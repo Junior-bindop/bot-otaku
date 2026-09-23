@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Quizz - Otaku Quizz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; --sub: #6b7280; --border: #e5e7eb; --sidebar: #ffffff; --sidebar-text: #4b5563; }
+        [data-theme="dark"] { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --sub: #94a3b8; --border: #334155; --sidebar: #0f172a; --sidebar-text: #94a3b8; }
+        body { background-color: var(--bg) !important; color: var(--text) !important; font-family: 'Segoe UI', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        .card { background: var(--card) !important; border-color: var(--border) !important; }
+        .sidebar-bg { background: var(--sidebar) !important; border-color: var(--border) !important; }
+        .sidebar-link { display:flex; align-items:center; padding:12px; border-radius:10px; font-weight:600; transition:all 0.2s; color: var(--sidebar-text); }
+        .sidebar-link:hover { background:rgba(220,38,38,0.08); color:#dc2626; }
+        .sidebar-link.active { background:rgba(220,38,38,0.08); color:#dc2626; font-weight:700; }
+        .sidebar-link.active-purple { background:rgba(168,85,247,0.08); color:#a855f7; font-weight:700; }
+        .sub-text { color: var(--sub) !important; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar Desktop -->
+    <aside class="w-64 sidebar-bg shadow-xl hidden md:flex flex-col border-r">
+        <div class="h-16 flex items-center justify-center border-b" style="border-color:var(--border)">
+            <i class="fa-solid fa-fire text-red-500 text-2xl mr-2"></i>
+            <span class="font-black text-xl tracking-wider">OTAKU<span class="text-red-500">QUIZZ</span></span>
+        </div>
+        <div class="p-4 flex-1">
+            <p class="text-xs sub-text font-bold uppercase tracking-wider mb-3">Menu</p>
+            <ul class="space-y-1">
+                <li><a href="/dashboard.html" class="sidebar-link"><i class="fa-solid fa-house w-6"></i> Accueil</a></li>
+                <li><a href="/mes-quizz.html" class="sidebar-link active"><i class="fa-solid fa-gamepad w-6"></i> Mes Quizz</a></li>
+                <li><a href="/avis.html" class="sidebar-link"><i class="fa-solid fa-comment-dots w-6"></i> Avis</a></li>
+                <li><a href="/agenda.html" class="sidebar-link"><i class="fa-regular fa-calendar-days w-6"></i> Agenda</a></li>
+                <li><a href="/membres.html" class="sidebar-link"><i class="fa-solid fa-users w-6"></i> Membres</a></li>
+                <li><a href="/classement.html" class="sidebar-link"><i class="fa-solid fa-trophy w-6"></i> Classement</a></li>
+                <li id="menu-admin-desktop" class="hidden"><a href="/admin.html" class="sidebar-link active-purple"><i class="fa-solid fa-shield-halved w-6"></i> Zone Admin</a></li>
+            </ul>
+        </div>
+        <div class="p-4 border-t" style="border-color:var(--border)">
+            <button onclick="logout()" class="w-full flex items-center justify-center p-2 sub-text hover:text-red-500 transition font-semibold">
+                <i class="fa-solid fa-right-from-bracket mr-2"></i> Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- Sidebar Mobile -->
+    <div id="mobile-menu-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleMobileMenu()">
+        <div id="mobile-menu" class="fixed inset-y-0 left-0 w-64 sidebar-bg border-r transform -translate-x-full transition-transform duration-300 flex flex-col z-50" onclick="event.stopPropagation()">
+            <div class="h-16 flex items-center justify-between px-4 border-b" style="border-color:var(--border)">
+                <span class="font-black text-xl">OTAKU<span class="text-red-500">QUIZZ</span></span>
+                <button onclick="toggleMobileMenu()" class="sub-text p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 flex-1">
+                <ul class="space-y-1">
+                    <li><a href="/dashboard.html" class="sidebar-link"><i class="fa-solid fa-house w-6"></i> Accueil</a></li>
+                    <li><a href="/mes-quizz.html" class="sidebar-link active"><i class="fa-solid fa-gamepad w-6"></i> Mes Quizz</a></li>
+                <li><a href="/avis.html" class="sidebar-link"><i class="fa-solid fa-comment-dots w-6"></i> Avis</a></li>
+                    <li><a href="/agenda.html" class="sidebar-link"><i class="fa-regular fa-calendar-days w-6"></i> Agenda</a></li>
+                    <li><a href="/membres.html" class="sidebar-link"><i class="fa-solid fa-users w-6"></i> Membres</a></li>
+                    <li><a href="/classement.html" class="sidebar-link"><i class="fa-solid fa-trophy w-6"></i> Classement</a></li>
+                    <li id="menu-admin-mobile" class="hidden"><a href="/admin.html" class="sidebar-link active-purple"><i class="fa-solid fa-shield-halved w-6"></i> Zone Admin</a></li>
+                </ul>
+            </div>
+            <div class="p-4 border-t" style="border-color:var(--border)">
+                <button onclick="logout()" class="w-full p-3 bg-gray-800 text-white rounded-lg font-bold hover:bg-gray-700 transition"><i class="fa-solid fa-right-from-bracket mr-2"></i> Déconnexion</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto">
+        <header class="card border-b shadow-sm h-14 flex items-center px-4 md:px-8 sticky top-0 z-10 justify-between">
+            <div class="flex items-center">
+                <button onclick="toggleMobileMenu()" class="md:hidden mr-4 sub-text"><i class="fa-solid fa-bars text-xl"></i></button>
+                <h1 class="text-lg font-black"><i class="fa-solid fa-gamepad text-red-500 mr-2"></i> Mes Quizz</h1>
+            </div>
+            <!-- Bouton Thème -->
+            <button id="theme-btn" onclick="toggleTheme()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-sm font-bold transition" style="border-color:var(--border); color:var(--sub)">
+                <i id="theme-icon" class="fa-solid fa-moon"></i>
+                <span id="theme-label">Sombre</span>
+            </button>
+        </header>
+
+        <div class="p-4 md:p-8 max-w-4xl mx-auto w-full">
+            <div id="quizz-list" class="space-y-4">
+                <div class="text-center py-16 sub-text">
+                    <i class="fa-solid fa-spinner fa-spin text-4xl mb-4"></i>
+                    <p class="font-semibold">Chargement...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton flottant Nouveau Quizz -->
+        <a href="/dashboard.html" class="fixed bottom-6 right-6 bg-gradient-to-r from-red-500 to-orange-400 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl hover:shadow-2xl transform hover:scale-110 transition z-20">
+            <i class="fa-solid fa-plus text-xl"></i>
+        </a>
+    </main>
+
+    <!-- Modal Confirmation Suppression -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="card rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-red-100 rounded-full opacity-30"></div>
+            <div class="absolute -bottom-10 -left-10 w-24 h-24 bg-green-100 rounded-full opacity-30"></div>
+            <div class="relative z-10">
+                <img src="/logo-snk.png" alt="SNK" class="w-20 h-20 mb-4 mx-auto object-contain drop-shadow-md">
+                <h3 class="text-xl font-black mb-2">Supprimer ce quizz ?</h3>
+                <p class="sub-text text-sm mb-6">Cette action est irréversible. Le quizz et toutes ses questions seront supprimés.</p>
+                <div class="flex gap-3">
+                    <button onclick="closeConfirm()" class="flex-1 py-3 border border-gray-300 sub-text font-bold rounded-xl hover:bg-gray-50 transition" style="border-color:var(--border)">Annuler</button>
+                    <button onclick="confirmDelete()" class="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Alerte AOT -->
+    <div id="custom-alert" class="hidden fixed inset-0 bg-black bg-opacity-70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="card rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-red-100 rounded-full opacity-30"></div>
+            <div class="absolute -bottom-10 -left-10 w-24 h-24 bg-green-100 rounded-full opacity-30"></div>
+            <div class="relative z-10">
+                <img src="/logo-snk.png" alt="SNK" class="w-20 h-20 mb-4 mx-auto object-contain drop-shadow-md">
+                <h3 id="alert-title" class="text-xl font-black mb-2"></h3>
+                <p id="alert-message" class="sub-text text-sm mb-6 leading-relaxed"></p>
+                <button onclick="closeCustomAlert()" class="w-full py-3 bg-gradient-to-r from-green-600 to-green-500 text-white font-bold rounded-xl shadow-lg transition">Continuer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        if (!token) window.location.href = '/';
+        if (role === 'admin') {
+            document.getElementById('menu-admin-desktop').classList.remove('hidden');
+            document.getElementById('menu-admin-mobile').classList.remove('hidden');
+        }
+
+        // --- THÈME ---
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            document.getElementById('theme-icon').className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            document.getElementById('theme-label').innerText = theme === 'dark' ? 'Clair' : 'Sombre';
+        }
+        function toggleTheme() {
+            applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        }
+
+        const STATUTS = {
+            'EN_ATTENTE': { label: 'Planifié', color: 'bg-yellow-100 text-yellow-700' },
+            'EN_COURS': { label: 'En cours', color: 'bg-blue-100 text-blue-700' },
+            'TERMINE': { label: 'Terminé', color: 'bg-gray-100 text-gray-500' }
+        };
+
+        let deleteTarget = null;
+
+        async function loadQuizz() {
+            const res = await fetch('/api/quizz');
+            const quizz = await res.json();
+            const container = document.getElementById('quizz-list');
+
+            if (!quizz.length) {
+                container.innerHTML = `
+                    <div class="text-center py-20 sub-text">
+                        <i class="fa-regular fa-face-frown-open text-6xl mb-6"></i>
+                        <p class="font-bold text-lg">Aucun quizz planifié pour l'instant</p>
+                        <p class="text-sm mt-2">Clique sur le bouton <span class="text-red-500 font-semibold">+</span> pour en créer un !</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = quizz.map(q => {
+                const statut = STATUTS[q.statut] || STATUTS['EN_ATTENTE'];
+                const date = new Date(q.date_planifiee).toLocaleString('fr-FR', { weekday: 'short', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
+                return `
+                <div class="card rounded-2xl shadow-sm border p-5 flex items-center justify-between gap-4" style="border-color:var(--border)">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1 flex-wrap">
+                            <h3 class="font-black text-base truncate">${q.titre}</h3>
+                            <span class="px-2 py-0.5 text-xs font-bold rounded-full ${statut.color}">${statut.label}</span>
+                        </div>
+                        <p class="sub-text text-sm"><i class="fa-regular fa-calendar mr-1"></i> ${date}</p>
+                    </div>
+                    <button onclick="askDelete(${q.id})" class="flex-shrink-0 p-3 sub-text hover:text-red-500 rounded-xl transition">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>`;
+            }).join('');
+        }
+
+        function askDelete(id) {
+            deleteTarget = id;
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+        function closeConfirm() {
+            deleteTarget = null;
+            document.getElementById('confirm-modal').classList.add('hidden');
+        }
+        async function confirmDelete() {
+            const idToDelete = deleteTarget; // Sauvegarder avant closeConfirm() qui remet à null !
+            closeConfirm();
+            await fetch(`/api/quizz/${idToDelete}`, { method: 'DELETE', headers: { 'Authorization': token } });
+            showAlert('Supprimé !', 'Le quizz a bien été supprimé.');
+            loadQuizz();
+        }
+
+        function showAlert(title, message) {
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-message').innerHTML = message;
+            document.getElementById('custom-alert').classList.remove('hidden');
+        }
+        function closeCustomAlert() { document.getElementById('custom-alert').classList.add('hidden'); }
+
+        function toggleMobileMenu() {
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const menu = document.getElementById('mobile-menu');
+            if (overlay.classList.contains('hidden')) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => menu.classList.remove('-translate-x-full'), 10);
+            } else {
+                menu.classList.add('-translate-x-full');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+        function logout() { localStorage.clear(); window.location.href = '/'; }
+
+        // --- ONGLETS ---
+        function switchTab(tab) {
+            if (tab === 'quizz') {
+                document.getElementById('content-quizz').classList.remove('hidden');
+                document.getElementById('content-avis').classList.add('hidden');
+                document.getElementById('tab-quizz').className = "px-6 py-3 font-bold text-red-500 border-b-2 border-red-500 transition";
+                document.getElementById('tab-avis').className = "px-6 py-3 font-bold sub-text border-b-2 border-transparent transition hover:text-red-500";
+            } else {
+                document.getElementById('content-quizz').classList.add('hidden');
+                document.getElementById('content-avis').classList.remove('hidden');
+                document.getElementById('tab-avis').className = "px-6 py-3 font-bold text-red-500 border-b-2 border-red-500 transition";
+                document.getElementById('tab-quizz').className = "px-6 py-3 font-bold sub-text border-b-2 border-transparent transition hover:text-red-500";
+            }
+        }
+
+        // --- AVIS ---
+        let avisToSubmit = null;
+        function promptSubmitAvis() {
+            const text = document.getElementById('avis-texte').value.trim();
+            if (!text) {
+                showAlert('Erreur', 'Veuillez écrire un avis avant de soumettre.');
+                return;
+            }
+            avisToSubmit = text;
+            
+            // On recycle la modale de confirmation pour l'avis
+            document.querySelector('#confirm-modal h3').innerText = 'Envoyer cet avis ?';
+            document.querySelector('#confirm-modal p').innerText = 'Tu as le droit à 3 avis par semaine. Es-tu sûr de vouloir envoyer ça ?';
+            const btn = document.querySelector('#confirm-modal button.bg-red-500');
+            btn.innerText = 'Envoyer';
+            btn.onclick = submitAvis;
+            
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        async function submitAvis() {
+            closeConfirm();
+            if (!avisToSubmit) return;
+            
+            try {
+                const res = await fetch('/api/avis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                    body: JSON.stringify({
+                        numero: localStorage.getItem('numero') || 'Inconnu',
+                        pseudo: localStorage.getItem('pseudo') || 'Inconnu',
+                        message: avisToSubmit
+                    })
+                });
+                
+                const data = await res.json();
+                if (data.error) {
+                    showAlert('Erreur', data.error);
+                } else {
+                    showAlert('C\'est fait !', 'Ton avis a bien été envoyé. Tu seras jugé.');
+                    document.getElementById('avis-texte').value = '';
+                }
+            } catch (e) {
+                showAlert('Erreur', 'Impossible d\'envoyer ton avis.');
+            }
+            avisToSubmit = null;
+            
+            // Remettre la modale de confirmation dans son état d'origine
+            document.querySelector('#confirm-modal h3').innerText = 'Supprimer ce quizz ?';
+            document.querySelector('#confirm-modal p').innerText = 'Cette action est irréversible. Le quizz et toutes ses questions seront supprimés.';
+            const btn = document.querySelector('#confirm-modal button.bg-red-500');
+            btn.innerText = 'Supprimer';
+            btn.onclick = confirmDelete;
+        }
+
+        loadQuizz();
+
+        // Ouverture automatique de l'onglet si demandé dans l'URL
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('tab') === 'avis') {
+                switchTab('avis');
+            }
+        });
+    </script>
+</body>
+</html>

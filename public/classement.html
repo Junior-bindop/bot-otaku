@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classement - Otaku Quizz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; --sub: #6b7280; --border: #f3f4f6; --sidebar: #ffffff; --sidebar-text: #4b5563; }
+        [data-theme="dark"] { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --sub: #94a3b8; --border: #334155; --sidebar: #0f172a; --sidebar-text: #94a3b8; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; transition: background 0.3s, color 0.3s; }
+        .card { background: var(--card); border: 1px solid var(--border); }
+        .sidebar-bg { background: var(--sidebar); border-color: var(--border); }
+        .sidebar-link { display:flex; align-items:center; padding:12px; border-radius:10px; font-weight:600; transition:all 0.2s; color: var(--sidebar-text); }
+        .sidebar-link:hover { background:rgba(220,38,38,0.08); color:#dc2626; }
+        .sidebar-link.active { background:rgba(220,38,38,0.08); color:#dc2626; font-weight:700; }
+        .sidebar-link.active-purple { background:rgba(168,85,247,0.08); color:#a855f7; font-weight:700; }
+        .sub-text { color: var(--sub); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar Desktop -->
+    <aside class="w-64 sidebar-bg shadow-xl hidden md:flex flex-col border-r">
+        <div class="h-16 flex items-center justify-center border-b" style="border-color:var(--border)">
+            <i class="fa-solid fa-fire text-red-500 text-2xl mr-2"></i>
+            <span class="font-black text-xl tracking-wider">OTAKU<span class="text-red-500">QUIZZ</span></span>
+        </div>
+        <div class="p-4 flex-1">
+            <p class="text-xs sub-text font-bold uppercase tracking-wider mb-3">Menu</p>
+            <ul class="space-y-1">
+                <li><a href="/dashboard.html" class="sidebar-link"><i class="fa-solid fa-house w-6"></i> Accueil</a></li>
+                <li><a href="/mes-quizz.html" class="sidebar-link"><i class="fa-solid fa-gamepad w-6"></i> Mes Quizz</a></li>
+                <li><a href="/avis.html" class="sidebar-link"><i class="fa-solid fa-comment-dots w-6"></i> Avis</a></li>
+                <li><a href="/agenda.html" class="sidebar-link"><i class="fa-regular fa-calendar-days w-6"></i> Agenda</a></li>
+                <li><a href="/membres.html" class="sidebar-link"><i class="fa-solid fa-users w-6"></i> Membres</a></li>
+                <li><a href="/classement.html" class="sidebar-link active"><i class="fa-solid fa-trophy w-6"></i> Classement</a></li>
+                <li id="menu-admin-desktop" class="hidden"><a href="/admin.html" class="sidebar-link active-purple"><i class="fa-solid fa-shield-halved w-6"></i> Zone Admin</a></li>
+            </ul>
+        </div>
+        <div class="p-4 border-t" style="border-color:var(--border)">
+            <button onclick="logout()" class="w-full flex items-center justify-center p-2 sub-text hover:text-red-500 transition font-semibold">
+                <i class="fa-solid fa-right-from-bracket mr-2"></i> Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- Sidebar Mobile -->
+    <div id="mobile-menu-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleMobileMenu()">
+        <div id="mobile-menu" class="fixed inset-y-0 left-0 w-64 sidebar-bg border-r transform -translate-x-full transition-transform duration-300 flex flex-col z-50" onclick="event.stopPropagation()">
+            <div class="h-16 flex items-center justify-between px-4 border-b" style="border-color:var(--border)">
+                <span class="font-black text-xl">OTAKU<span class="text-red-500">QUIZZ</span></span>
+                <button onclick="toggleMobileMenu()" class="sub-text p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 flex-1">
+                <ul class="space-y-1">
+                    <li><a href="/dashboard.html" class="sidebar-link"><i class="fa-solid fa-house w-6"></i> Accueil</a></li>
+                    <li><a href="/mes-quizz.html" class="sidebar-link"><i class="fa-solid fa-gamepad w-6"></i> Mes Quizz</a></li>
+                <li><a href="/avis.html" class="sidebar-link"><i class="fa-solid fa-comment-dots w-6"></i> Avis</a></li>
+                <li><a href="/agenda.html" class="sidebar-link"><i class="fa-regular fa-calendar-days w-6"></i> Agenda</a></li>
+                <li><a href="/membres.html" class="sidebar-link"><i class="fa-solid fa-users w-6"></i> Membres</a></li>
+                    <li><a href="/classement.html" class="sidebar-link active"><i class="fa-solid fa-trophy w-6"></i> Classement</a></li>
+                    <li id="menu-admin-mobile" class="hidden"><a href="/admin.html" class="sidebar-link active-purple"><i class="fa-solid fa-shield-halved w-6"></i> Zone Admin</a></li>
+                </ul>
+            </div>
+            <div class="p-4 border-t" style="border-color:var(--border)">
+                <button onclick="logout()" class="w-full p-3 bg-gray-800 text-white rounded-lg font-bold hover:bg-gray-700 transition"><i class="fa-solid fa-right-from-bracket mr-2"></i> Déconnexion</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto">
+        <header class="card border-b shadow-sm h-14 flex items-center px-4 md:px-8 sticky top-0 z-10 justify-between">
+            <div class="flex items-center">
+                <button onclick="toggleMobileMenu()" class="md:hidden mr-4 sub-text"><i class="fa-solid fa-bars text-xl"></i></button>
+                <h1 class="text-lg font-black"><i class="fa-solid fa-trophy text-yellow-500 mr-2"></i> Classement Général</h1>
+            </div>
+            <!-- Bouton Thème -->
+            <button id="theme-btn" onclick="toggleTheme()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-sm font-bold transition" style="border-color:var(--border); color:var(--sub)">
+                <i id="theme-icon" class="fa-solid fa-moon"></i>
+                <span id="theme-label">Sombre</span>
+            </button>
+        </header>
+
+        <div class="p-4 md:p-8 max-w-3xl mx-auto w-full space-y-6">
+            <!-- Filtres -->
+            <div class="flex gap-2 flex-wrap">
+                <button onclick="setFilter('global')" id="btn-global" class="filter-btn px-4 py-2 text-sm font-bold bg-red-500 text-white rounded-xl shadow">🌍 Global</button>
+                <button onclick="setFilter('quizz')" id="btn-quizz" class="filter-btn px-4 py-2 text-sm font-bold rounded-xl border sub-text transition hover:border-red-400 hover:text-red-500" style="border-color:var(--border); background:var(--card)">🏆 Par Quizz</button>
+            </div>
+
+            <!-- Section Global -->
+            <div id="section-global">
+                <div class="card rounded-2xl shadow-sm overflow-hidden">
+                    <div class="p-5 border-b" style="border-color:var(--border)">
+                        <h2 class="font-black text-lg">🏆 Top Joueurs — Tous les Quizz</h2>
+                        <p class="sub-text text-sm mt-0.5">Cumul des points sur l'ensemble des parties</p>
+                    </div>
+                    <div id="global-list" class="divide-y" style="border-color:var(--border)">
+                        <div class="p-8 text-center sub-text"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3 block"></i>Chargement...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Par Quizz -->
+            <div id="section-quizz" class="hidden space-y-4">
+                <div id="quizz-selector" class="space-y-3">
+                    <div class="p-8 text-center sub-text"><i class="fa-solid fa-spinner fa-spin text-2xl mb-3 block"></i>Chargement...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        if (!token) window.location.href = '/';
+        if (role === 'admin') {
+            document.getElementById('menu-admin-desktop').classList.remove('hidden');
+            document.getElementById('menu-admin-mobile').classList.remove('hidden');
+        }
+
+        // --- THÈME ---
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            document.getElementById('theme-icon').className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            document.getElementById('theme-label').innerText = theme === 'dark' ? 'Clair' : 'Sombre';
+        }
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            applyTheme(current === 'dark' ? 'light' : 'dark');
+            if (currentFilter === 'global') loadGlobal();
+            else renderQuizzSelector();
+        }
+
+        let currentFilter = 'global';
+        let allQuizz = [];
+
+        function setFilter(f) {
+            currentFilter = f;
+            document.getElementById('section-global').classList.toggle('hidden', f !== 'global');
+            document.getElementById('section-quizz').classList.toggle('hidden', f !== 'quizz');
+            
+            const activeClass = 'filter-btn px-4 py-2 text-sm font-bold rounded-xl bg-red-500 text-white shadow';
+            const inactiveClass = 'filter-btn px-4 py-2 text-sm font-bold rounded-xl border sub-text transition hover:border-red-400 hover:text-red-500';
+            
+            document.getElementById('btn-global').className = f === 'global' ? activeClass : inactiveClass;
+            document.getElementById('btn-quizz').className = f === 'quizz' ? activeClass : inactiveClass;
+            
+            if (f === 'global') {
+                document.getElementById('btn-global').style.background = ''; // Enlever le style inline pour laisser la classe bg-red-500 agir
+                document.getElementById('btn-quizz').style.background = 'var(--card)';
+            } else {
+                document.getElementById('btn-global').style.background = 'var(--card)';
+                document.getElementById('btn-quizz').style.background = '';
+            }
+
+            if (f === 'quizz') renderQuizzSelector();
+        }
+
+        const medals = ['🥇', '🥈', '🥉'];
+        function playerRow(p, i) {
+            const medal = medals[i] || `${i + 1}.`;
+            // Classes conditionnelles respectant le thème
+            let bgClass = '';
+            if (i === 0) bgClass = document.documentElement.getAttribute('data-theme') === 'dark' ? 'bg-yellow-900/20 text-yellow-100' : 'bg-yellow-50';
+            else if (i === 1) bgClass = document.documentElement.getAttribute('data-theme') === 'dark' ? 'bg-gray-700/30' : 'bg-gray-50';
+            else if (i === 2) bgClass = document.documentElement.getAttribute('data-theme') === 'dark' ? 'bg-orange-900/20 text-orange-100' : 'bg-orange-50';
+            
+            const bataillesHtml = p.batailles !== undefined ? `<div class="text-xs sub-text font-bold"><i class="fa-solid fa-fire mr-1"></i>${p.batailles} bataille(s)</div>` : '';
+
+            return `<div class="flex items-center gap-4 p-4 ${bgClass}">
+                <span class="text-xl w-8 text-center">${medal}</span>
+                <div class="flex-1 font-bold">
+                    ${p.nom_joueur}
+                    ${bataillesHtml}
+                </div>
+                <span class="text-lg font-black text-red-500">${p.points} <span class="text-xs font-normal sub-text">pts</span></span>
+            </div>`;
+        }
+
+        async function loadGlobal() {
+            const container = document.getElementById('global-list');
+            try {
+                const res = await fetch('/api/classement', { headers: { 'Authorization': token } });
+                const data = await res.json();
+                
+                if (data.error || !data.length) {
+                    container.innerHTML = `<div class="p-8 text-center sub-text">Aucun score enregistré pour l'instant.</div>`;
+                    return;
+                }
+                container.innerHTML = data.map(playerRow).join('');
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="p-8 text-center text-red-500">Erreur lors du chargement des scores.</div>`;
+            }
+        }
+
+        async function renderQuizzSelector() {
+            const res = await fetch('/api/quizz');
+            allQuizz = await res.json();
+            const container = document.getElementById('quizz-selector');
+            if (!allQuizz.length) {
+                container.innerHTML = `<div class="card rounded-2xl p-8 text-center sub-text">Aucun quizz terminé.</div>`;
+                return;
+            }
+            container.innerHTML = allQuizz.filter(q => q.statut === 'TERMINE').map(q => `
+                <div class="card rounded-2xl shadow-sm overflow-hidden">
+                    <div class="p-4 border-b flex items-center justify-between cursor-pointer" style="border-color:var(--border)" onclick="toggleQuizzScore(${q.id}, this)">
+                        <div>
+                            <h3 class="font-bold">${q.titre}</h3>
+                            <p class="sub-text text-xs">${new Date(q.date_planifiee).toLocaleDateString('fr-FR', {day:'2-digit', month:'long', year:'numeric'})}</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-down sub-text transition-transform"></i>
+                    </div>
+                    <div id="scores-${q.id}" class="hidden divide-y" style="border-color:var(--border)"></div>
+                </div>`).join('') || `<div class="card rounded-2xl p-8 text-center sub-text">Aucun quizz terminé pour l'instant.</div>`;
+        }
+
+        async function toggleQuizzScore(id, header) {
+            const container = document.getElementById(`scores-${id}`);
+            const icon = header.querySelector('i');
+            if (!container.classList.contains('hidden')) {
+                container.classList.add('hidden');
+                icon.style.transform = '';
+                return;
+            }
+            container.innerHTML = `<div class="p-6 text-center sub-text"><i class="fa-solid fa-spinner fa-spin"></i></div>`;
+            container.classList.remove('hidden');
+            icon.style.transform = 'rotate(180deg)';
+            const res = await fetch(`/api/classement/${id}`, { headers: { 'Authorization': token } });
+            const data = await res.json();
+            container.innerHTML = data.length ? data.map(playerRow).join('') : `<div class="p-6 text-center sub-text text-sm">Aucun score pour ce quizz.</div>`;
+        }
+
+        function toggleMobileMenu() {
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const menu = document.getElementById('mobile-menu');
+            if (overlay.classList.contains('hidden')) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => menu.classList.remove('-translate-x-full'), 10);
+            } else {
+                menu.classList.add('-translate-x-full');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
+        }
+        function logout() { localStorage.clear(); window.location.href = '/'; }
+
+        loadGlobal();
+    </script>
+</body>
+</html>

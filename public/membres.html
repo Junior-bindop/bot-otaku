@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membres - Otaku Quizz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --bg:#f3f4f6; --card:#ffffff; --text:#1f2937; --sub:#6b7280; --border:#e5e7eb; --sidebar:#ffffff; --sidebar-text:#4b5563; }
+        [data-theme="dark"] { --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --sub:#94a3b8; --border:#334155; --sidebar:#0f172a; --sidebar-text:#94a3b8; }
+        body { background-color: var(--bg) !important; color: var(--text) !important; transition: background-color 0.3s, color 0.3s; font-family:'Segoe UI',sans-serif; }
+        .sidebar-link { display:flex; align-items:center; padding:12px; border-radius:10px; font-weight:600; transition:all 0.2s; color:var(--sidebar-text); }
+        .sidebar-link:hover { background:rgba(220,38,38,0.08); color:#dc2626; }
+        .sidebar-link.active { background:rgba(220,38,38,0.08); color:#dc2626; font-weight:700; }
+        .sidebar-link-purple { display:flex; align-items:center; padding:12px; border-radius:10px; font-weight:600; transition:all 0.2s; color:var(--sidebar-text); }
+        .sidebar-link-purple:hover { background:rgba(168,85,247,0.08); color:#a855f7; }
+        .sub-text { color:var(--sub) !important; }
+        .card { background: var(--card) !important; border-color: var(--border) !important; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar Desktop -->
+    <aside class="w-64 shadow-xl hidden md:flex flex-col border-r" style="background:var(--sidebar); border-color:var(--border)">
+        <div class="h-16 flex items-center justify-center border-b" style="border-color:var(--border)">
+            <i class="fa-solid fa-fire text-red-500 text-2xl mr-2"></i>
+            <span class="font-black text-xl tracking-wider">OTAKU<span class="text-red-500">QUIZZ</span></span>
+        </div>
+        <div class="p-4 flex-1">
+            <p class="text-xs sub-text font-bold uppercase tracking-wider mb-3">Menu</p>
+            <ul class="space-y-1">
+                <li><a href="/dashboard.html" class="sidebar-link"><i class="fa-solid fa-house w-6"></i> Accueil</a></li>
+                <li><a href="/mes-quizz.html" class="sidebar-link"><i class="fa-solid fa-gamepad w-6"></i> Mes Quizz</a></li>
+                <li><a href="/avis.html" class="sidebar-link"><i class="fa-solid fa-comment-dots w-6"></i> Avis</a></li>
+                <li><a href="/agenda.html" class="sidebar-link"><i class="fa-regular fa-calendar-days w-6"></i> Agenda</a></li>
+                <li><a href="/classement.html" class="sidebar-link"><i class="fa-solid fa-trophy w-6"></i> Classement</a></li>
+                <li><a href="/membres.html" class="sidebar-link active"><i class="fa-solid fa-users w-6"></i> Membres</a></li>
+                <li id="menu-admin-desktop" class="hidden"><a href="/admin.html" class="sidebar-link-purple"><i class="fa-solid fa-shield-halved w-6"></i> Zone Admin</a></li>
+            </ul>
+        </div>
+        <div class="p-4 border-t" style="border-color:var(--border)">
+            <button onclick="logout()" class="w-full flex items-center justify-center p-2 sub-text hover:text-red-500 transition font-semibold">
+                <i class="fa-solid fa-right-from-bracket mr-2"></i> Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- Sidebar Mobile -->
+    <div id="mobile-menu-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleMobileMenu()">
+        <div id="mobile-menu" class="fixed inset-y-0 left-0 w-64 border-r transform -translate-x-full transition-transform duration-300 flex flex-col z-50" style="background:var(--sidebar); border-color:var(--border)" onclick="event.stopPropagation()">
+            <div class="h-16 flex items-center justify-between px-4 border-b" style="border-color:var(--border)">
+                <span class="font-black text-xl">OTAKU<span class="text-red-500">QUIZZ</span></span>
+                <button onclick="toggleMobileMenu()" class="sub-text p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 flex-1">
+                <ul class="space-y-1">
+                    <li><a href="/dashboard.html" class="sidebar-link"><i class="fa-solid fa-house w-6"></i> Accueil</a></li>
+                    <li><a href="/mes-quizz.html" class="sidebar-link"><i class="fa-solid fa-gamepad w-6"></i> Mes Quizz</a></li>
+                <li><a href="/avis.html" class="sidebar-link"><i class="fa-solid fa-comment-dots w-6"></i> Avis</a></li>
+                    <li><a href="/agenda.html" class="sidebar-link"><i class="fa-regular fa-calendar-days w-6"></i> Agenda</a></li>
+                    <li><a href="/classement.html" class="sidebar-link"><i class="fa-solid fa-trophy w-6"></i> Classement</a></li>
+                    <li><a href="/membres.html" class="sidebar-link active"><i class="fa-solid fa-users w-6"></i> Membres</a></li>
+                    <li id="menu-admin-mobile" class="hidden"><a href="/admin.html" class="sidebar-link-purple"><i class="fa-solid fa-shield-halved w-6"></i> Zone Admin</a></li>
+                </ul>
+            </div>
+            <div class="p-4 border-t" style="border-color:var(--border)">
+                <button onclick="logout()" class="w-full p-3 bg-gray-800 text-white rounded-lg font-bold hover:bg-gray-700 transition"><i class="fa-solid fa-right-from-bracket mr-2"></i> Déconnexion</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto">
+        <header class="card border-b shadow-sm h-14 flex items-center px-4 md:px-8 sticky top-0 z-10 justify-between">
+            <div class="flex items-center">
+                <button onclick="toggleMobileMenu()" class="md:hidden mr-4 sub-text"><i class="fa-solid fa-bars text-xl"></i></button>
+                <h1 class="text-lg font-black"><i class="fa-solid fa-users text-orange-500 mr-2"></i> Liste des Membres</h1>
+            </div>
+            <button id="theme-btn" onclick="toggleTheme()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-sm font-bold transition" style="border-color:var(--border); color:var(--sub)">
+                <i id="theme-icon" class="fa-solid fa-moon"></i>
+                <span id="theme-label">Sombre</span>
+            </button>
+        </header>
+
+        <div class="p-4 md:p-8 max-w-4xl mx-auto w-full">
+            <div class="card rounded-2xl shadow-sm border p-6 md:p-8">
+                
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-black">Effectifs du Bataillon</h2>
+                        <p class="text-sm sub-text font-bold mt-1">Généré automatiquement (N° masqués)</p>
+                    </div>
+                    <div class="bg-orange-100 text-orange-600 px-4 py-2 rounded-xl font-black text-sm">
+                        <span id="membres-count">0</span> recrue(s)
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-xl border" style="border-color:var(--border)">
+                    <table class="w-full text-left border-collapse min-w-max">
+                        <thead>
+                            <tr class="bg-gray-50 border-b" style="background:var(--bg); border-color:var(--border)">
+                                <th class="p-3 md:p-4 font-bold uppercase text-[10px] md:text-xs tracking-wider sub-text whitespace-nowrap">Membre</th>
+                                <th class="p-3 md:p-4 font-bold uppercase text-[10px] md:text-xs tracking-wider sub-text whitespace-nowrap text-center">Statut</th>
+                                <th class="p-3 md:p-4 font-bold uppercase text-[10px] md:text-xs tracking-wider sub-text text-right whitespace-nowrap">Importance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="membres-list" class="divide-y" style="border-color:var(--border)">
+                            <!-- JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        if (!token) window.location.href = '/';
+        if (role === 'admin') {
+            document.getElementById('menu-admin-desktop').classList.remove('hidden');
+            document.getElementById('menu-admin-mobile').classList.remove('hidden');
+        }
+
+        // --- THÈME ---
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            document.getElementById('theme-icon').className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            document.getElementById('theme-label').innerText = theme === 'dark' ? 'Clair' : 'Sombre';
+        }
+        function toggleTheme() {
+            applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        }
+
+        function toggleMobileMenu() {
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const menu = document.getElementById('mobile-menu');
+            if (overlay.classList.contains('hidden')) { overlay.classList.remove('hidden'); setTimeout(() => menu.classList.remove('-translate-x-full'), 10); }
+            else { menu.classList.add('-translate-x-full'); setTimeout(() => overlay.classList.add('hidden'), 300); }
+        }
+        function logout() { localStorage.clear(); window.location.href = '/'; }
+
+        // --- FETCH MEMBRES ---
+        async function loadMembres() {
+            try {
+                const res = await fetch('/api/membres');
+                const membres = await res.json();
+                
+                document.getElementById('membres-count').innerText = membres.length;
+                const container = document.getElementById('membres-list');
+                
+                if (membres.length === 0) {
+                    container.innerHTML = `<tr><td colspan="3" class="p-6 text-center sub-text">Aucun membre détecté pour le moment.</td></tr>`;
+                    return;
+                }
+
+                container.innerHTML = membres.map(m => {
+                    let badgeColor, badgeIcon, roleName;
+                    if (m.role === 'Katika') { badgeColor = 'bg-red-100 text-red-600'; badgeIcon = 'fa-solid fa-chess-king'; roleName = 'Katika'; }
+                    else if (m.role === 'Admin' || m.is_admin) { badgeColor = 'bg-purple-100 text-purple-600'; badgeIcon = 'fa-solid fa-crown'; roleName = 'Admin'; }
+                    else { badgeColor = 'bg-gray-100 text-gray-600'; badgeIcon = 'fa-solid fa-user'; roleName = 'Membre'; }
+                    
+                    return `
+                    <tr class="hover:bg-gray-50 transition" style="border-color:var(--border)">
+                        <td class="p-3 md:p-4">
+                            <div class="flex items-center gap-2 md:gap-3">
+                                <div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 font-black flex-shrink-0">
+                                    ${m.pseudo.charAt(0).toUpperCase()}
+                                </div>
+                                <div class="truncate max-w-[120px] md:max-w-[200px]">
+                                    <p class="font-bold text-xs md:text-base truncate">${m.pseudo}</p>
+                                    <p class="text-[10px] md:text-xs sub-text">**********</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-3 md:p-4 text-center">
+                            <span class="inline-flex items-center justify-center gap-1 px-2 py-1 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs font-bold whitespace-nowrap ${badgeColor}">
+                                <i class="${badgeIcon}"></i> <span>${roleName}</span>
+                            </span>
+                        </td>
+                        <td class="p-3 md:p-4 text-right font-black text-sm md:text-base">
+                            ${m.message_count || 0}
+                        </td>
+                    </tr>
+                `}).join('');
+                
+                if(document.documentElement.getAttribute('data-theme') === 'dark') {
+                    document.querySelectorAll('tr.hover\\:bg-gray-50').forEach(el => {
+                        el.addEventListener('mouseenter', () => el.style.background = 'rgba(255,255,255,0.05)');
+                        el.addEventListener('mouseleave', () => el.style.background = 'transparent');
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        loadMembres();
+    </script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otaku Quizz - Connexion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            /* Image de fond style Anime Scenery */
+            background-image: url('/assets/bg-login.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.25); /* Plus transparent */
+            backdrop-filter: blur(15px); /* Flou augmenté pour la lisibilité */
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Écran de connexion -->
+    <div id="login-screen" class="glass-panel rounded-2xl shadow-2xl p-8 max-w-sm w-full transform transition-all duration-300 hover:scale-105">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-extrabold text-white tracking-wider drop-shadow-lg mb-2">OTAKU QUIZZ</h1>
+            <p class="text-sm text-gray-200 font-semibold drop-shadow-md">Gérez vos quizz WhatsApp</p>
+        </div>
+
+        <form id="login-form" class="space-y-5">
+            <div>
+                <label for="pseudo" class="block text-sm font-bold text-white mb-2 drop-shadow-md">Pseudo WhatsApp</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-user text-gray-400"></i>
+                    </div>
+                    <input type="text" id="pseudo" required
+                        class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 transition-shadow text-gray-900 bg-white/80"
+                        placeholder="Votre pseudo...">
+                </div>
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-bold text-white mb-2 drop-shadow-md">Mot de passe</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fa-solid fa-lock text-gray-400"></i>
+                    </div>
+                    <input type="password" id="password" required
+                        class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 transition-shadow text-gray-900 bg-white/80"
+                        placeholder="Entrez le mot de passe...">
+                </div>
+                <div id="error-msg" class="bg-red-500/90 border border-red-400 text-white text-sm md:text-base px-4 py-3 rounded-lg mt-4 hidden font-bold drop-shadow-md text-center">
+                    Identifiants incorrects.
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transform transition hover:-translate-y-1">
+                SE CONNECTER <i class="fa-solid fa-arrow-right ml-2 mt-1"></i>
+            </button>
+        </form>
+    </div>
+
+    <!-- Script de connexion -->
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pseudo = document.getElementById('pseudo').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pseudo, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Sauvegarde le token, le rôle, le pseudo et le numéro dans le navigateur
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('role', data.role);
+                    localStorage.setItem('pseudo', data.pseudo);
+                    if (data.numero) localStorage.setItem('numero', data.numero);
+                    
+                    // Redirige vers le tableau de bord
+                    window.location.href = '/dashboard.html';
+                } else {
+                    const errorBox = document.getElementById('error-msg');
+                    errorBox.innerText = data.error || "Identifiants incorrects.";
+                    errorBox.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert("Impossible de joindre le serveur.");
+            }
+        });
+    </script>
+</body>
+</html>

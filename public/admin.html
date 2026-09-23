@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zone Admin - Otaku Quizz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; --sub: #6b7280; --border: #f3f4f6; --sidebar: #ffffff; --sidebar-text: #4b5563; }
+        [data-theme="dark"] { --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --sub: #94a3b8; --border: #334155; --sidebar: #0f172a; --sidebar-text: #94a3b8; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; transition: background 0.3s, color 0.3s; }
+        .card { background: var(--card); border: 1px solid var(--border); }
+        .sidebar-bg { background: var(--sidebar); border-color: var(--border); }
+        .sidebar-link { display:flex; align-items:center; padding:12px; border-radius:10px; font-weight:600; transition:all 0.2s; color: var(--sidebar-text); }
+        .sidebar-link:hover { background:rgba(220,38,38,0.08); color:#dc2626; }
+        .sidebar-link.active { background:rgba(220,38,38,0.08); color:#dc2626; font-weight:700; }
+        .sidebar-link.active-purple { background:rgba(168,85,247,0.1); color:#a855f7; font-weight:700; }
+        .sub-text { color: var(--sub); }
+        .input-field { background: var(--bg); border: 1px solid var(--border); color: var(--text); }
+        .input-field::placeholder { color: var(--sub); }
+        .log-row { background: var(--bg); border: 1px solid var(--border); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar Desktop -->
+    <aside class="w-64 sidebar-bg shadow-xl hidden md:flex flex-col border-r">
+        <div class="h-16 flex items-center justify-center border-b" style="border-color:var(--border)">
+            <i class="fa-solid fa-fire text-red-500 text-2xl mr-2"></i>
+            <span class="font-black text-xl tracking-wider">OTAKU<span class="text-red-500">QUIZZ</span></span>
+        </div>
+        <div class="p-4 flex-1">
+            <p class="text-xs sub-text font-bold uppercase tracking-wider mb-3">Menu</p>
+            <ul class="space-y-1">
+                <li><a href="/dashboard.html" class="sidebar-link"><i class="fa-solid fa-house w-6"></i> Accueil</a></li>
+                <li><a href="/mes-quizz.html" class="sidebar-link"><i class="fa-solid fa-gamepad w-6"></i> Mes Quizz</a></li>
+                <li><a href="/avis.html" class="sidebar-link"><i class="fa-solid fa-comment-dots w-6"></i> Avis</a></li>
+                <li><a href="/agenda.html" class="sidebar-link"><i class="fa-regular fa-calendar-days w-6"></i> Agenda</a></li>
+                <li><a href="/membres.html" class="sidebar-link"><i class="fa-solid fa-users w-6"></i> Membres</a></li>
+                <li><a href="/classement.html" class="sidebar-link"><i class="fa-solid fa-trophy w-6"></i> Classement</a></li>
+                <li><a href="/admin.html" class="sidebar-link active-purple"><i class="fa-solid fa-shield-halved w-6"></i> Zone Admin</a></li>
+            </ul>
+        </div>
+        <div class="p-4 border-t" style="border-color:var(--border)">
+            <button onclick="logout()" class="w-full flex items-center justify-center p-2 sub-text hover:text-red-500 transition font-semibold">
+                <i class="fa-solid fa-right-from-bracket mr-2"></i> Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- Sidebar Mobile -->
+    <div id="mobile-menu-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleMobileMenu()">
+        <div id="mobile-menu" class="fixed inset-y-0 left-0 w-64 sidebar-bg border-r transform -translate-x-full transition-transform duration-300 flex flex-col z-50" onclick="event.stopPropagation()">
+            <div class="h-16 flex items-center justify-between px-4 border-b" style="border-color:var(--border)">
+                <span class="font-black text-xl">OTAKU<span class="text-red-500">QUIZZ</span></span>
+                <button onclick="toggleMobileMenu()" class="sub-text p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 flex-1">
+                <ul class="space-y-1">
+                    <li><a href="/dashboard.html" class="sidebar-link"><i class="fa-solid fa-house w-6"></i> Accueil</a></li>
+                    <li><a href="/mes-quizz.html" class="sidebar-link"><i class="fa-solid fa-gamepad w-6"></i> Mes Quizz</a></li>
+                <li><a href="/avis.html" class="sidebar-link"><i class="fa-solid fa-comment-dots w-6"></i> Avis</a></li>
+                <li><a href="/agenda.html" class="sidebar-link"><i class="fa-regular fa-calendar-days w-6"></i> Agenda</a></li>
+                <li><a href="/membres.html" class="sidebar-link"><i class="fa-solid fa-users w-6"></i> Membres</a></li>
+                    <li><a href="/classement.html" class="sidebar-link"><i class="fa-solid fa-trophy w-6"></i> Classement</a></li>
+                    <li><a href="/admin.html" class="sidebar-link active-purple"><i class="fa-solid fa-shield-halved w-6"></i> Zone Admin</a></li>
+                </ul>
+            </div>
+            <div class="p-4 border-t" style="border-color:var(--border)">
+                <button onclick="logout()" class="w-full p-3 bg-gray-800 text-white rounded-lg font-bold hover:bg-gray-700 transition"><i class="fa-solid fa-right-from-bracket mr-2"></i> Déconnexion</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto">
+        <header class="card border-b shadow-sm h-14 flex items-center px-4 md:px-8 sticky top-0 z-10 justify-between">
+            <div class="flex items-center">
+                <button onclick="toggleMobileMenu()" class="md:hidden mr-4 sub-text"><i class="fa-solid fa-bars text-xl"></i></button>
+                <h1 class="text-lg font-black"><i class="fa-solid fa-shield-halved text-purple-500 mr-2"></i> Zone Admin</h1>
+            </div>
+            <!-- Bouton Thème -->
+            <button id="theme-btn" onclick="toggleTheme()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-sm font-bold transition" style="border-color:var(--border); color:var(--sub)">
+                <i id="theme-icon" class="fa-solid fa-moon"></i>
+                <span id="theme-label">Sombre</span>
+            </button>
+        </header>
+
+        <div class="p-4 md:p-8 max-w-5xl mx-auto w-full">
+            <!-- Onglets -->
+            <div class="flex border-b mb-6 overflow-x-auto" style="border-color:var(--border)">
+                <button onclick="switchTab('general')" id="tab-general" class="px-6 py-3 font-bold text-purple-500 border-b-2 border-purple-500 transition whitespace-nowrap">
+                    <i class="fa-solid fa-gear mr-2"></i> Général
+                </button>
+                <button onclick="switchTab('historique')" id="tab-historique" class="px-6 py-3 font-bold sub-text border-b-2 border-transparent transition hover:text-purple-500 whitespace-nowrap">
+                    <i class="fa-solid fa-clock-rotate-left mr-2"></i> Historique
+                </button>
+                <button onclick="switchTab('avis')" id="tab-avis" class="px-6 py-3 font-bold sub-text border-b-2 border-transparent transition hover:text-purple-500 whitespace-nowrap">
+                    <i class="fa-solid fa-comment-dots mr-2"></i> Avis
+                </button>
+                <button onclick="switchTab('stats')" id="tab-stats" class="px-6 py-3 font-bold sub-text border-b-2 border-transparent transition hover:text-purple-500 whitespace-nowrap">
+                    <i class="fa-solid fa-chart-bar mr-2"></i> Mots
+                </button>
+            </div>
+
+            <!-- Onglet : Général -->
+            <div id="content-general" class="space-y-6">
+                <!-- Mot de passe public -->
+                <div class="card rounded-2xl shadow-sm p-6">
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="bg-orange-100 text-orange-500 p-4 rounded-xl text-xl"><i class="fa-solid fa-key"></i></div>
+                        <div>
+                            <h2 class="text-lg font-black">Mot de passe public</h2>
+                            <p class="sub-text text-sm">Partagé avec les créateurs (membres WhatsApp)</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 sub-text"></i>
+                            <input type="password" id="new-password" placeholder="Nouveau mot de passe public..." class="input-field w-full pl-9 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-orange-400 focus:outline-none text-sm">
+                        </div>
+                        <button onclick="changePassword()" class="px-5 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-xl hover:shadow-lg transition text-sm">Valider</button>
+                    </div>
+                </div>
+
+                <!-- Mot de passe Superadmin -->
+                <div class="card rounded-2xl shadow-sm p-6">
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="bg-purple-100 text-purple-500 p-4 rounded-xl text-xl"><i class="fa-solid fa-user-shield"></i></div>
+                        <div>
+                            <h2 class="text-lg font-black">Mot de passe SuperAdmin</h2>
+                            <p class="sub-text text-sm">Accès à cette zone. Le VIP recevra le nouveau par IB.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 sub-text"></i>
+                            <input type="password" id="new-superadmin-password" placeholder="Nouveau mot de passe superadmin..." class="input-field w-full pl-9 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-400 focus:outline-none text-sm">
+                        </div>
+                        <button onclick="changeSuperadminPassword()" class="px-5 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold rounded-xl hover:shadow-lg transition text-sm">Valider</button>
+                    </div>
+                </div>
+
+                <!-- Mot de passe de Création de Quizz -->
+                <div class="card rounded-2xl shadow-sm p-6">
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="bg-blue-100 text-blue-500 p-4 rounded-xl text-xl"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                        <div>
+                            <h2 class="text-lg font-black">Mot de passe programmation Quizz</h2>
+                            <p class="sub-text text-sm">Mot de passe demandé à la fin de la création d'un quizz.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-lock absolute left-3 top-1/2 -translate-y-1/2 sub-text"></i>
+                            <input type="password" id="new-quizz-password" placeholder="Nouveau mot de passe de création..." class="input-field w-full pl-9 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none text-sm">
+                        </div>
+                        <button onclick="changeQuizzPassword()" class="px-5 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold rounded-xl hover:shadow-lg transition text-sm">Valider</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet : Historique -->
+            <div id="content-historique" class="hidden">
+                <div class="card rounded-2xl shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-black">Historique des actions</h2>
+                        <button onclick="loadLogs()" class="p-2 sub-text hover:text-purple-500 transition"><i class="fa-solid fa-rotate-right"></i></button>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border" style="border-color:var(--border)">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-gray-50 border-b sub-text uppercase text-xs" style="background:var(--bg); border-color:var(--border)">
+                                    <th class="p-3">Date</th>
+                                    <th class="p-3">Utilisateur</th>
+                                    <th class="p-3">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logs-container" class="divide-y" style="border-color:var(--border)">
+                                <tr><td colspan="3" class="p-4 text-center sub-text">Chargement...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet : Avis -->
+            <div id="content-avis" class="hidden">
+                <div class="card rounded-2xl shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-black">Avis & Recommandations</h2>
+                        <button onclick="loadAvis()" class="p-2 sub-text hover:text-purple-500 transition"><i class="fa-solid fa-rotate-right"></i></button>
+                    </div>
+                    <div id="avis-container" class="space-y-4 max-h-96 overflow-y-auto">
+                        <div class="text-center py-4 sub-text">Chargement...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet : Statistiques Mots -->
+            <div id="content-stats" class="hidden">
+                <div class="card rounded-2xl shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-black">Top 10 des mots utilisés</h2>
+                        <button onclick="loadStatsMots()" class="p-2 sub-text hover:text-purple-500 transition"><i class="fa-solid fa-rotate-right"></i></button>
+                    </div>
+                    <div id="stats-container" class="space-y-2">
+                        <div class="text-center py-4 sub-text">Chargement...</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal AOT -->
+    <div id="custom-alert" class="hidden fixed inset-0 bg-black bg-opacity-70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="card rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center relative overflow-hidden">
+            <div class="absolute -top-8 -right-8 w-28 h-28 bg-red-100 rounded-full opacity-40"></div>
+            <div class="absolute -bottom-8 -left-8 w-20 h-20 bg-green-100 rounded-full opacity-40"></div>
+            <div class="relative z-10">
+                <img src="/logo-snk.png" class="w-20 h-20 mb-4 mx-auto object-contain drop-shadow-md">
+                <h3 id="alert-title" class="text-xl font-black mb-2"></h3>
+                <p id="alert-message" class="sub-text text-sm mb-6 leading-relaxed"></p>
+                <button onclick="closeCustomAlert()" class="w-full py-3 bg-gradient-to-r from-green-600 to-green-500 text-white font-bold rounded-xl shadow-lg transition">Continuer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        if (!token || role !== 'admin') window.location.href = '/dashboard.html';
+
+        // --- THÈME ---
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            document.getElementById('theme-icon').className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            document.getElementById('theme-label').innerText = theme === 'dark' ? 'Clair' : 'Sombre';
+        }
+        function toggleTheme() {
+            applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        }
+
+        // --- ONGLETS ---
+        function switchTab(tab) {
+            ['general', 'historique', 'avis', 'stats'].forEach(t => {
+                document.getElementById('content-' + t).classList.add('hidden');
+                const tabEl = document.getElementById('tab-' + t);
+                tabEl.className = "px-6 py-3 font-bold sub-text border-b-2 border-transparent transition hover:text-purple-500 whitespace-nowrap";
+            });
+            document.getElementById('content-' + tab).classList.remove('hidden');
+            const activeTab = document.getElementById('tab-' + tab);
+            activeTab.className = "px-6 py-3 font-bold text-purple-500 border-b-2 border-purple-500 transition whitespace-nowrap";
+
+            if (tab === 'historique') loadLogs();
+            if (tab === 'avis') loadAvis();
+            if (tab === 'stats') loadStatsMots();
+        }
+
+        async function changePassword() {
+            const newPwd = document.getElementById('new-password').value.trim();
+            if (!newPwd || newPwd.length < 4) { showAlert('Erreur', 'Le mot de passe doit contenir au moins 4 caractères.'); return; }
+            const res = await fetch('/api/config/password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                body: JSON.stringify({ password: newPwd })
+            });
+            showAlert(res.ok ? 'Succès !' : 'Erreur', res.ok ? 'Le mot de passe public a été mis à jour.' : 'Une erreur est survenue.');
+            if (res.ok) document.getElementById('new-password').value = '';
+        }
+
+        async function changeSuperadminPassword() {
+            const newPwd = document.getElementById('new-superadmin-password').value.trim();
+            if (!newPwd || newPwd.length < 4) { showAlert('Erreur', 'Le mot de passe doit contenir au moins 4 caractères.'); return; }
+            const res = await fetch('/api/superadmin/password', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                body: JSON.stringify({ password: newPwd })
+            });
+            showAlert(res.ok ? 'Succès !' : 'Erreur', res.ok ? 'Le mot de passe SuperAdmin a été modifié. Le VIP a été notifié par message privé.' : 'Une erreur est survenue.');
+            if (res.ok) document.getElementById('new-superadmin-password').value = '';
+        }
+
+        async function changeQuizzPassword() {
+            const newPwd = document.getElementById('new-quizz-password').value.trim();
+            if (!newPwd || newPwd.length < 1) { showAlert('Erreur', 'Veuillez entrer un mot de passe.'); return; }
+            const res = await fetch('/api/superadmin/quizz_password', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                body: JSON.stringify({ password: newPwd })
+            });
+            showAlert(res.ok ? 'Succès !' : 'Erreur', res.ok ? 'Le mot de passe de programmation des quizz a été mis à jour.' : 'Une erreur est survenue.');
+            if (res.ok) document.getElementById('new-quizz-password').value = '';
+        }
+
+        async function loadLogs() {
+            const container = document.getElementById('logs-container');
+            container.innerHTML = `<tr><td colspan="3" class="p-4 text-center sub-text"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></td></tr>`;
+            const res = await fetch('/api/historique', { headers: { 'Authorization': token } });
+            const logs = await res.json();
+            if (!logs.length) { container.innerHTML = `<tr><td colspan="3" class="p-4 text-center sub-text text-sm">Aucune action enregistrée.</td></tr>`; return; }
+
+            container.innerHTML = logs.map(log => {
+                const date = new Date(log.date).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+                return `<tr class="hover:bg-gray-50 transition" style="border-color:var(--border)">
+                    <td class="p-3 text-xs sub-text whitespace-nowrap">${date}</td>
+                    <td class="p-3 font-bold">${log.utilisateur}</td>
+                    <td class="p-3 text-sm">${log.action}</td>
+                </tr>`;
+            }).join('');
+            
+            if(document.documentElement.getAttribute('data-theme') === 'dark') {
+                document.querySelectorAll('tr.hover\\:bg-gray-50').forEach(el => {
+                    el.addEventListener('mouseenter', () => el.style.background = 'rgba(255,255,255,0.05)');
+                    el.addEventListener('mouseleave', () => el.style.background = 'transparent');
+                });
+            }
+        }
+
+        async function loadAvis() {
+            const container = document.getElementById('avis-container');
+            container.innerHTML = `<div class="text-center py-4 sub-text"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></div>`;
+            const res = await fetch('/api/avis', { headers: { 'Authorization': token } });
+            const avis = await res.json();
+            if (!avis.length) { container.innerHTML = `<p class="sub-text text-center py-4 text-sm">Aucun avis pour l'instant.</p>`; return; }
+
+            container.innerHTML = avis.map(a => {
+                const date = new Date(a.date).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+                return `<div class="card p-4 rounded-xl shadow-sm border" style="border-color:var(--border)">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-bold text-orange-500">${a.pseudo}</span>
+                        <span class="text-xs sub-text">${date}</span>
+                    </div>
+                    <p class="text-sm">${a.message}</p>
+                </div>`;
+            }).join('');
+        }
+
+        async function loadStatsMots() {
+            const container = document.getElementById('stats-container');
+            container.innerHTML = `<div class="text-center py-4 sub-text"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></div>`;
+            const res = await fetch('/api/stats/mots', { headers: { 'Authorization': token } });
+            const mots = await res.json();
+            if (!mots.length) { container.innerHTML = `<p class="sub-text text-center py-4 text-sm">Pas assez de données.</p>`; return; }
+
+            const max = Math.max(...mots.map(m => m.compte));
+            container.innerHTML = mots.map((m, i) => {
+                const percent = Math.round((m.compte / max) * 100);
+                return `<div class="flex items-center gap-3">
+                    <div class="w-6 font-bold sub-text text-right text-xs">#${i+1}</div>
+                    <div class="flex-1">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="font-bold">${m.mot}</span>
+                            <span class="text-xs sub-text">${m.compte} fois</span>
+                        </div>
+                        <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden" style="background:var(--border)">
+                            <div class="h-full bg-purple-500 rounded-full" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function showAlert(title, message) {
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-message').innerHTML = message;
+            document.getElementById('custom-alert').classList.remove('hidden');
+        }
+        function closeCustomAlert() { document.getElementById('custom-alert').classList.add('hidden'); }
+
+        function toggleMobileMenu() {
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const menu = document.getElementById('mobile-menu');
+            if (overlay.classList.contains('hidden')) { overlay.classList.remove('hidden'); setTimeout(() => menu.classList.remove('-translate-x-full'), 10); }
+            else { menu.classList.add('-translate-x-full'); setTimeout(() => overlay.classList.add('hidden'), 300); }
+        }
+        function logout() { localStorage.clear(); window.location.href = '/'; }
+    </script>
+</body>
+</html>

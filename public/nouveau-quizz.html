@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un Quizz - Otaku Quizz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --bg:#f3f4f6; --card:#ffffff; --text:#1f2937; --sub:#6b7280; --border:#e5e7eb; --sidebar:#ffffff; --sidebar-text:#4b5563; }
+        [data-theme="dark"] { --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --sub:#94a3b8; --border:#334155; --sidebar:#0f172a; --sidebar-text:#94a3b8; }
+        body { background-color: var(--bg) !important; color: var(--text) !important; transition: background-color 0.3s, color 0.3s; font-family:'Segoe UI',sans-serif; }
+        .sidebar-link { display:flex; align-items:center; padding:12px; border-radius:10px; font-weight:600; transition:all 0.2s; color:var(--sidebar-text); }
+        .sidebar-link:hover { background:rgba(220,38,38,0.08); color:#dc2626; }
+        .sidebar-link.active { background:rgba(220,38,38,0.08); color:#dc2626; font-weight:700; }
+        .sidebar-link-purple { display:flex; align-items:center; padding:12px; border-radius:10px; font-weight:600; transition:all 0.2s; color:var(--sidebar-text); }
+        .sidebar-link-purple:hover { background:rgba(168,85,247,0.08); color:#a855f7; }
+        .sub-text { color:var(--sub) !important; }
+        
+        .input-field { background: var(--bg); border: 1px solid var(--border); color: var(--text); }
+        .input-field::placeholder { color: var(--sub); }
+        .card { background: var(--card) !important; border-color: var(--border) !important; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar Desktop -->
+    <aside class="w-64 shadow-xl hidden md:flex flex-col border-r" style="background:var(--sidebar); border-color:var(--border)">
+        <div class="h-16 flex items-center justify-center border-b" style="border-color:var(--border)">
+            <i class="fa-solid fa-fire text-red-500 text-2xl mr-2"></i>
+            <span class="font-black text-xl tracking-wider">OTAKU<span class="text-red-500">QUIZZ</span></span>
+        </div>
+        <div class="p-4 flex-1">
+            <p class="text-xs sub-text font-bold uppercase tracking-wider mb-3">Menu</p>
+            <ul class="space-y-1">
+                <li><a href="/dashboard.html" class="sidebar-link active"><i class="fa-solid fa-house w-6"></i> Accueil</a></li>
+                <li><a href="/mes-quizz.html" class="sidebar-link"><i class="fa-solid fa-gamepad w-6"></i> Mes Quizz</a></li>
+                <li><a href="/avis.html" class="sidebar-link"><i class="fa-solid fa-comment-dots w-6"></i> Avis</a></li>
+                <li><a href="/agenda.html" class="sidebar-link"><i class="fa-regular fa-calendar-days w-6"></i> Agenda</a></li>
+                <li><a href="/membres.html" class="sidebar-link"><i class="fa-solid fa-users w-6"></i> Membres</a></li>
+                <li><a href="/classement.html" class="sidebar-link"><i class="fa-solid fa-trophy w-6"></i> Classement</a></li>
+                <li id="menu-admin-desktop" class="hidden"><a href="/admin.html" class="sidebar-link-purple"><i class="fa-solid fa-shield-halved w-6"></i> Zone Admin</a></li>
+            </ul>
+        </div>
+        <div class="p-4 border-t" style="border-color:var(--border)">
+            <button onclick="logout()" class="w-full flex items-center justify-center p-2 sub-text hover:text-red-500 transition font-semibold">
+                <i class="fa-solid fa-right-from-bracket mr-2"></i> Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- Sidebar Mobile -->
+    <div id="mobile-menu-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleMobileMenu()">
+        <div id="mobile-menu" class="fixed inset-y-0 left-0 w-64 border-r transform -translate-x-full transition-transform duration-300 flex flex-col z-50" style="background:var(--sidebar); border-color:var(--border)" onclick="event.stopPropagation()">
+            <div class="h-16 flex items-center justify-between px-4 border-b" style="border-color:var(--border)">
+                <span class="font-black text-xl">OTAKU<span class="text-red-500">QUIZZ</span></span>
+                <button onclick="toggleMobileMenu()" class="sub-text p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 flex-1">
+                <ul class="space-y-1">
+                    <li><a href="/dashboard.html" class="sidebar-link active"><i class="fa-solid fa-house w-6"></i> Accueil</a></li>
+                    <li><a href="/mes-quizz.html" class="sidebar-link"><i class="fa-solid fa-gamepad w-6"></i> Mes Quizz</a></li>
+                <li><a href="/avis.html" class="sidebar-link"><i class="fa-solid fa-comment-dots w-6"></i> Avis</a></li>
+                <li><a href="/agenda.html" class="sidebar-link"><i class="fa-regular fa-calendar-days w-6"></i> Agenda</a></li>
+                <li><a href="/membres.html" class="sidebar-link"><i class="fa-solid fa-users w-6"></i> Membres</a></li>
+                    <li><a href="/classement.html" class="sidebar-link"><i class="fa-solid fa-trophy w-6"></i> Classement</a></li>
+                    <li id="menu-admin-mobile" class="hidden"><a href="/admin.html" class="sidebar-link-purple"><i class="fa-solid fa-shield-halved w-6"></i> Zone Admin</a></li>
+                </ul>
+            </div>
+            <div class="p-4 border-t" style="border-color:var(--border)">
+                <button onclick="logout()" class="w-full p-3 bg-gray-800 text-white rounded-lg font-bold hover:bg-gray-700 transition"><i class="fa-solid fa-right-from-bracket mr-2"></i> Déconnexion</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto">
+        <header class="card border-b shadow-sm h-14 flex items-center px-4 md:px-8 sticky top-0 z-10 justify-between">
+            <div class="flex items-center">
+                <button onclick="toggleMobileMenu()" class="md:hidden mr-4 sub-text"><i class="fa-solid fa-bars text-xl"></i></button>
+                <h1 class="text-lg font-black"><i class="fa-solid fa-pen-nib text-red-500 mr-2"></i> Nouveau Quizz</h1>
+            </div>
+            <!-- Bouton Thème -->
+            <button id="theme-btn" onclick="toggleTheme()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-sm font-bold transition" style="border-color:var(--border); color:var(--sub)">
+                <i id="theme-icon" class="fa-solid fa-moon"></i>
+                <span id="theme-label">Sombre</span>
+            </button>
+        </header>
+
+        <div class="p-4 md:p-8 max-w-4xl mx-auto w-full space-y-6 pb-32">
+            
+            <div class="card rounded-2xl shadow-sm border p-6 md:p-8">
+                <!-- Info de base -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div>
+                        <label class="block text-sm font-bold sub-text mb-2 uppercase tracking-wider">Titre du Quizz</label>
+                        <input type="text" id="quizz-titre" placeholder="Ex: L'attaque des titans - Difficile" class="input-field w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-red-400 focus:outline-none font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold sub-text mb-2 uppercase tracking-wider">Date & Heure</label>
+                        <input type="datetime-local" id="quizz-date" class="input-field w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-red-400 focus:outline-none font-semibold">
+                    </div>
+                </div>
+
+                <!-- Questions -->
+                <div>
+                    <div class="flex justify-between items-center mb-4 border-b pb-2" style="border-color:var(--border)">
+                        <h2 class="text-lg font-black"><i class="fa-solid fa-list-ol text-red-500 mr-2"></i> Questions</h2>
+                        <span id="q-count" class="px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-black">0 question</span>
+                    </div>
+                    
+                    <div id="questions-container" class="space-y-6 mb-6"></div>
+
+                    <button onclick="addQuestion()" class="w-full py-4 border-2 border-dashed border-red-300 text-red-500 font-bold rounded-2xl hover:bg-red-50 transition flex flex-col items-center justify-center gap-1">
+                        <i class="fa-solid fa-circle-plus text-2xl"></i>
+                        <span>Ajouter une question</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton flottant de validation -->
+        <div class="fixed bottom-0 left-0 md:left-64 right-0 p-4 border-t shadow-[0_-10px_20px_rgba(0,0,0,0.05)] z-20" style="background:var(--card); border-color:var(--border)">
+            <div class="max-w-4xl mx-auto flex justify-end gap-3">
+                <button onclick="window.location.href='/dashboard.html'" class="px-6 py-3 border font-bold rounded-xl sub-text hover:bg-gray-50 transition" style="border-color:var(--border)">Annuler</button>
+                <button onclick="saveQuizz()" class="px-8 py-3 bg-gradient-to-r from-red-600 to-orange-500 text-white font-black rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition flex items-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> Programmer le Quizz
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal AOT -->
+    <div id="custom-alert" class="hidden fixed inset-0 bg-black bg-opacity-70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="card rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-red-100 rounded-full opacity-30"></div>
+            <div class="absolute -bottom-10 -left-10 w-24 h-24 bg-green-100 rounded-full opacity-30"></div>
+            <div class="relative z-10">
+                <img src="/logo-snk.png" alt="SNK" class="w-20 h-20 mb-4 mx-auto object-contain drop-shadow-md">
+                <h3 id="alert-title" class="text-xl font-black mb-2"></h3>
+                <p id="alert-message" class="sub-text text-sm mb-6 leading-relaxed"></p>
+                <button onclick="closeCustomAlert()" class="w-full py-3 bg-gradient-to-r from-green-600 to-green-500 text-white font-bold rounded-xl shadow-lg transition">Continuer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Password de Création -->
+    <div id="password-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="card rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center relative overflow-hidden">
+            <div class="relative z-10">
+                <div class="bg-blue-100 text-blue-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-solid fa-key"></i>
+                </div>
+                <h3 class="text-xl font-black mb-2">Mot de passe de Création</h3>
+                <p class="sub-text text-sm mb-6 leading-relaxed">Veuillez entrer le mot de passe spécial pour programmer ce quizz.</p>
+                <input type="password" id="creation-password" class="input-field w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none font-bold mb-4 text-center" placeholder="Votre mot de passe...">
+                <div class="flex gap-3">
+                    <button onclick="document.getElementById('password-modal').classList.add('hidden')" class="flex-1 py-3 border border-gray-300 sub-text font-bold rounded-xl hover:bg-gray-50 transition" style="border-color:var(--border)">Annuler</button>
+                    <button onclick="confirmSaveQuizz()" class="flex-1 py-3 bg-blue-500 text-white font-bold rounded-xl hover:bg-blue-600 transition">Valider</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        if (!token) window.location.href = '/';
+        if (role === 'admin') {
+            document.getElementById('menu-admin-desktop').classList.remove('hidden');
+            document.getElementById('menu-admin-mobile').classList.remove('hidden');
+        }
+
+        // --- THÈME ---
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            document.getElementById('theme-icon').className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            document.getElementById('theme-label').innerText = theme === 'dark' ? 'Clair' : 'Sombre';
+        }
+        function toggleTheme() {
+            applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        }
+
+        // Préremplir la date si on vient du calendrier
+        const urlParams = new URLSearchParams(window.location.search);
+        const dateParam = urlParams.get('date');
+        if (dateParam) { document.getElementById('quizz-date').value = `${dateParam}T20:00`; }
+
+        let questions = [];
+
+        function addQuestion() {
+            const qId = Date.now();
+            questions.push({ id: qId, type: 'QRO', time: 30, text: '', answers: [] });
+            renderQuestions();
+        }
+
+        function removeQuestion(id) {
+            questions = questions.filter(q => q.id !== id);
+            renderQuestions();
+        }
+
+        function updateType(id, type) {
+            const q = questions.find(q => q.id === id);
+            q.type = type;
+            if (type === 'QRO') {
+                q.answers = [];
+            } else {
+                q.answers = ['', '', '', ''];
+                q.correctIndex = 0; // Par défaut, la réponse A est la bonne
+            }
+            renderQuestions();
+        }
+
+        function addReponseQRO(id) {
+            const q = questions.find(q => q.id === id);
+            q.answers.push('');
+            renderQuestions();
+        }
+
+        function removeReponseQRO(id, idx) {
+            const q = questions.find(q => q.id === id);
+            q.answers.splice(idx, 1);
+            renderQuestions();
+        }
+
+        function updateInput(id, field, value, idx = null) {
+            const q = questions.find(q => q.id === id);
+            if (idx !== null) q.answers[idx] = value;
+            else q[field] = value;
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            document.getElementById('q-count').innerText = `${questions.length} question(s)`;
+            
+            container.innerHTML = questions.map((q, index) => `
+                <div class="card rounded-2xl border p-5 group" style="border-color:var(--border)">
+                    <div class="flex items-center gap-2 mb-4 flex-wrap">
+                        <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-black flex-shrink-0">${index + 1}</div>
+                        <div class="flex gap-1 bg-gray-100 rounded-lg p-1" style="background:var(--bg)">
+                            <button onclick="updateType(${q.id}, 'QRO')" class="px-3 py-1 rounded-md text-sm font-bold transition ${q.type === 'QRO' ? 'bg-white shadow text-red-500' : 'sub-text'}">QRO</button>
+                            <button onclick="updateType(${q.id}, 'QCM')" class="px-3 py-1 rounded-md text-sm font-bold transition ${q.type === 'QCM' ? 'bg-white shadow text-red-500' : 'sub-text'}">QCM</button>
+                        </div>
+                        <div class="flex-1"></div>
+                        <select onchange="updateInput(${q.id}, 'time', this.value)" class="input-field text-sm font-bold rounded-lg px-2 py-1.5 focus:outline-none">
+                            <option value="20" ${q.time==20?'selected':''}>⏱️ 20s</option>
+                            <option value="30" ${q.time==30?'selected':''}>⏱️ 30s</option>
+                            <option value="45" ${q.time==45?'selected':''}>⏱️ 45s</option>
+                            <option value="60" ${q.time==60?'selected':''}>⏱️ 60s</option>
+                        </select>
+                        <button onclick="removeQuestion(${q.id})" class="text-gray-400 hover:text-white hover:bg-red-500 transition px-3 py-1.5 rounded-lg border ml-1" style="border-color:var(--border);"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    
+                    <textarea oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'; updateInput(${q.id}, 'text', this.value)" placeholder="Votre question..." class="input-field w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-red-400 focus:outline-none font-bold mb-4 resize-none overflow-hidden" rows="1" style="min-height: 48px;">${q.text}</textarea>
+                    
+                    ${q.type === 'QRO' ? `
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold sub-text uppercase">Réponses acceptées (tolérance)</label>
+                            ${q.answers.map((ans, i) => `
+                                <div class="flex gap-2">
+                                    <input type="text" onchange="updateInput(${q.id}, 'answers', this.value, ${i})" value="${ans}" placeholder="Variante ${i+1}" class="input-field flex-1 px-3 py-2 rounded-lg text-sm">
+                                    <button onclick="removeReponseQRO(${q.id}, ${i})" class="sub-text hover:text-red-500 px-2"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            `).join('')}
+                            <button onclick="addReponseQRO(${q.id})" class="text-xs font-bold text-red-500 hover:text-red-600 mt-2"><i class="fa-solid fa-plus"></i> Ajouter une variante correcte</button>
+                        </div>
+                    ` : `
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                            ${['A', 'B', 'C', 'D'].map((lettre, i) => `
+                                <div class="flex items-center gap-3 input-field rounded-xl p-2 pl-3 border-2 ${q.correctIndex === i ? 'border-red-500 bg-red-50' : 'border-transparent'} transition" style="${q.correctIndex === i && document.documentElement.getAttribute('data-theme') === 'dark' ? 'background:rgba(220,38,38,0.1)' : ''}">
+                                    <input type="radio" name="qcm_correct_${q.id}" value="${i}" ${q.correctIndex === i ? 'checked' : ''} onchange="updateInput(${q.id}, 'correctIndex', ${i}); renderQuestions()" class="w-4 h-4 accent-red-600 cursor-pointer">
+                                    <span class="font-black sub-text w-4">${lettre}</span>
+                                    <input type="text" onchange="updateInput(${q.id}, 'answers', this.value, ${i})" value="${q.answers[i] || ''}" placeholder="Choix ${lettre}" class="bg-transparent flex-1 focus:outline-none text-sm font-semibold text-inherit">
+                                </div>
+                            `).join('')}
+                        </div>
+                        <p class="text-xs sub-text mt-3"><i class="fa-solid fa-circle-info text-blue-400"></i> Cochez le bouton à gauche pour désigner la bonne réponse.</p>
+                    `}
+                </div>
+            `).join('');
+            
+            // Correction des styles en ligne pour QRO/QCM toggle selon le thème
+            if(document.documentElement.getAttribute('data-theme') === 'dark') {
+                document.querySelectorAll('.bg-white.shadow').forEach(el => { el.style.background = 'var(--card)'; el.style.color = '#ef4444'; });
+            }
+        }
+
+        function saveQuizz() {
+            const titre = document.getElementById('quizz-titre').value.trim();
+            const date = document.getElementById('quizz-date').value;
+
+            if (!titre || !date) return showAlert('Oups !', 'Le titre et la date sont obligatoires.');
+            if (questions.length === 0) return showAlert('Oups !', 'Il faut au moins une question.');
+            
+            // Validation
+            for (let i = 0; i < questions.length; i++) {
+                const q = questions[i];
+                if (!q.text.trim()) return showAlert('Erreur', `La question ${i+1} est vide.`);
+                const validAnswers = q.answers.filter(a => a.trim() !== '');
+                if (validAnswers.length === 0) return showAlert('Erreur', `La question ${i+1} n'a aucune réponse valable.`);
+            }
+
+            // Tout est bon, on demande le mot de passe spécial
+            document.getElementById('creation-password').value = '';
+            document.getElementById('password-modal').classList.remove('hidden');
+        }
+
+        async function confirmSaveQuizz() {
+            const pwd = document.getElementById('creation-password').value.trim();
+            if(!pwd) return showAlert('Erreur', 'Veuillez entrer le mot de passe.');
+            
+            document.getElementById('password-modal').classList.add('hidden');
+
+            const titre = document.getElementById('quizz-titre').value.trim();
+            const date = document.getElementById('quizz-date').value;
+            const pseudoCreateur = localStorage.getItem('pseudo') || 'Inconnu';
+
+            // Préparation Payload
+            const payload = {
+                titre, date_planifiee: date,
+                createur: pseudoCreateur,
+                password_creation: pwd,
+                questions: questions.map(q => {
+                    if (q.type === 'QRO') {
+                        return {
+                            texte: q.text, temps_imparti: q.time, type: 'QRO',
+                            reponses: q.answers.filter(a => a.trim() !== '')
+                        };
+                    } else {
+                        // QCM
+                        const idx = q.correctIndex || 0;
+                        const correctText = q.answers[idx] || '';
+                        return {
+                            texte: q.text, temps_imparti: q.time, type: 'QCM',
+                            choix: q.answers,
+                            reponses: [correctText].filter(a => a.trim() !== '')
+                        };
+                    }
+                })
+            };
+
+            const res = await fetch('/api/quizz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': token },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                showAlert('Succès !', 'Le quizz a été planifié avec succès.');
+                setTimeout(() => window.location.href = '/mes-quizz.html', 1500);
+            } else {
+                const errData = await res.json().catch(()=>({}));
+                showAlert('Erreur', errData.error || 'Impossible d\'enregistrer le quizz. Mot de passe peut-être incorrect.');
+            }
+        }
+
+        function showAlert(title, message) {
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-message').innerHTML = message;
+            document.getElementById('custom-alert').classList.remove('hidden');
+        }
+        function closeCustomAlert() { document.getElementById('custom-alert').classList.add('hidden'); }
+
+        function toggleMobileMenu() {
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const menu = document.getElementById('mobile-menu');
+            if (overlay.classList.contains('hidden')) { overlay.classList.remove('hidden'); setTimeout(() => menu.classList.remove('-translate-x-full'), 10); }
+            else { menu.classList.add('-translate-x-full'); setTimeout(() => overlay.classList.add('hidden'), 300); }
+        }
+        function logout() { localStorage.clear(); window.location.href = '/'; }
+        
+        // Init avec 1 question vide
+        if (questions.length === 0) addQuestion();
+    </script>
+</body>
+</html>

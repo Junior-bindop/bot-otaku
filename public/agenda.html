@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda - Otaku Quizz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --bg:#f3f4f6; --card:#ffffff; --text:#1f2937; --sub:#6b7280; --border:#e5e7eb; --sidebar:#ffffff; --sidebar-text:#4b5563; }
+        [data-theme="dark"] { --bg:#0f172a; --card:#1e293b; --text:#f1f5f9; --sub:#94a3b8; --border:#334155; --sidebar:#0f172a; --sidebar-text:#94a3b8; }
+        body { background-color: var(--bg) !important; color: var(--text) !important; transition: background-color 0.3s, color 0.3s; font-family:'Segoe UI',sans-serif; }
+        .sidebar-link { display:flex; align-items:center; padding:12px; border-radius:10px; font-weight:600; transition:all 0.2s; color:var(--sidebar-text); }
+        .sidebar-link:hover { background:rgba(220,38,38,0.08); color:#dc2626; }
+        .sidebar-link.active { background:rgba(220,38,38,0.08); color:#dc2626; font-weight:700; }
+        .sidebar-link-purple { display:flex; align-items:center; padding:12px; border-radius:10px; font-weight:600; transition:all 0.2s; color:var(--sidebar-text); }
+        .sidebar-link-purple:hover { background:rgba(168,85,247,0.08); color:#a855f7; }
+        .sub-text { color:var(--sub) !important; }
+        .card { background: var(--card) !important; border-color: var(--border) !important; }
+        
+        .calendar-cell { min-height: 100px; padding: 6px; display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--border); transition: background-color 0.2s; }
+        .calendar-cell:hover { background: rgba(239, 68, 68, 0.05); }
+        .quizz-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+        .quizz-attente { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+        .quizz-termine { background: #f3f4f6; color: #6b7280; border: 1px solid #d1d5db; }
+        [data-theme="dark"] .quizz-attente { background: rgba(220,38,38,0.2); color: #fca5a5; border-color: rgba(220,38,38,0.4); }
+        [data-theme="dark"] .quizz-termine { background: rgba(255,255,255,0.1); color: #9ca3af; border-color: rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar Desktop -->
+    <aside class="w-64 shadow-xl hidden md:flex flex-col border-r" style="background:var(--sidebar); border-color:var(--border)">
+        <div class="h-16 flex items-center justify-center border-b" style="border-color:var(--border)">
+            <i class="fa-solid fa-fire text-red-500 text-2xl mr-2"></i>
+            <span class="font-black text-xl tracking-wider">OTAKU<span class="text-red-500">QUIZZ</span></span>
+        </div>
+        <div class="p-4 flex-1">
+            <p class="text-xs sub-text font-bold uppercase tracking-wider mb-3">Menu</p>
+            <ul class="space-y-1">
+                <li><a href="/dashboard.html" class="sidebar-link"><i class="fa-solid fa-house w-6"></i> Accueil</a></li>
+                <li><a href="/mes-quizz.html" class="sidebar-link"><i class="fa-solid fa-gamepad w-6"></i> Mes Quizz</a></li>
+                <li><a href="/avis.html" class="sidebar-link"><i class="fa-solid fa-comment-dots w-6"></i> Avis</a></li>
+                <li><a href="/agenda.html" class="sidebar-link active"><i class="fa-regular fa-calendar-days w-6"></i> Agenda</a></li>
+                <li><a href="/membres.html" class="sidebar-link"><i class="fa-solid fa-users w-6"></i> Membres</a></li>
+                <li><a href="/classement.html" class="sidebar-link"><i class="fa-solid fa-trophy w-6"></i> Classement</a></li>
+                <li id="menu-admin-desktop" class="hidden"><a href="/admin.html" class="sidebar-link-purple"><i class="fa-solid fa-shield-halved w-6"></i> Zone Admin</a></li>
+            </ul>
+        </div>
+        <div class="p-4 border-t" style="border-color:var(--border)">
+            <button onclick="logout()" class="w-full flex items-center justify-center p-2 sub-text hover:text-red-500 transition font-semibold">
+                <i class="fa-solid fa-right-from-bracket mr-2"></i> Déconnexion
+            </button>
+        </div>
+    </aside>
+
+    <!-- Sidebar Mobile -->
+    <div id="mobile-menu-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40" onclick="toggleMobileMenu()">
+        <div id="mobile-menu" class="fixed inset-y-0 left-0 w-64 border-r transform -translate-x-full transition-transform duration-300 flex flex-col z-50" style="background:var(--sidebar); border-color:var(--border)" onclick="event.stopPropagation()">
+            <div class="h-16 flex items-center justify-between px-4 border-b" style="border-color:var(--border)">
+                <span class="font-black text-xl">OTAKU<span class="text-red-500">QUIZZ</span></span>
+                <button onclick="toggleMobileMenu()" class="sub-text p-2"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 flex-1">
+                <ul class="space-y-1">
+                    <li><a href="/dashboard.html" class="sidebar-link"><i class="fa-solid fa-house w-6"></i> Accueil</a></li>
+                    <li><a href="/mes-quizz.html" class="sidebar-link"><i class="fa-solid fa-gamepad w-6"></i> Mes Quizz</a></li>
+                <li><a href="/avis.html" class="sidebar-link"><i class="fa-solid fa-comment-dots w-6"></i> Avis</a></li>
+                    <li><a href="/agenda.html" class="sidebar-link active"><i class="fa-regular fa-calendar-days w-6"></i> Agenda</a></li>
+                <li><a href="/membres.html" class="sidebar-link"><i class="fa-solid fa-users w-6"></i> Membres</a></li>
+                    <li><a href="/classement.html" class="sidebar-link"><i class="fa-solid fa-trophy w-6"></i> Classement</a></li>
+                    <li id="menu-admin-mobile" class="hidden"><a href="/admin.html" class="sidebar-link-purple"><i class="fa-solid fa-shield-halved w-6"></i> Zone Admin</a></li>
+                </ul>
+            </div>
+            <div class="p-4 border-t" style="border-color:var(--border)">
+                <button onclick="logout()" class="w-full p-3 bg-gray-800 text-white rounded-lg font-bold hover:bg-gray-700 transition"><i class="fa-solid fa-right-from-bracket mr-2"></i> Déconnexion</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto">
+        <header class="card border-b shadow-sm h-14 flex items-center px-4 md:px-8 sticky top-0 z-10 justify-between">
+            <div class="flex items-center">
+                <button onclick="toggleMobileMenu()" class="md:hidden mr-4 sub-text"><i class="fa-solid fa-bars text-xl"></i></button>
+                <h1 class="text-lg font-black"><i class="fa-regular fa-calendar-days text-blue-500 mr-2"></i> Agenda des Quizz</h1>
+            </div>
+            <button id="theme-btn" onclick="toggleTheme()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border text-sm font-bold transition" style="border-color:var(--border); color:var(--sub)">
+                <i id="theme-icon" class="fa-solid fa-moon"></i>
+                <span id="theme-label">Sombre</span>
+            </button>
+        </header>
+
+        <div class="p-4 md:p-8 max-w-6xl mx-auto w-full">
+            <div class="card rounded-2xl shadow-sm border p-4 md:p-6 mb-6">
+                
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="changeMonth(-1)" class="p-2 sub-text hover:text-red-500 rounded-lg transition border" style="border-color:var(--border)"><i class="fa-solid fa-chevron-left"></i></button>
+                    <h2 id="month-display" class="text-xl md:text-2xl font-black uppercase tracking-wider"></h2>
+                    <button onclick="changeMonth(1)" class="p-2 sub-text hover:text-red-500 rounded-lg transition border" style="border-color:var(--border)"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div class="overflow-x-auto pb-4">
+                    <div class="min-w-[600px] md:min-w-0">
+                        <div class="grid grid-cols-7 text-center text-xs md:text-sm font-bold sub-text mb-2 uppercase border-b pb-2" style="border-color:var(--border)">
+                            <div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div><div>Dim</div>
+                        </div>
+                        
+                        <div id="calendar-grid" class="grid grid-cols-7">
+                            <!-- Généré en JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Modale de Détails Quizz -->
+    <div id="details-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="card rounded-3xl shadow-2xl w-full max-w-md p-6 relative flex flex-col max-h-[90vh]">
+            <button onclick="closeDetails()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition" style="background:var(--bg); color:var(--text)">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div class="mb-4 pr-8">
+                <h3 class="text-xl font-black mb-1 capitalize" id="quizz-details-date"></h3>
+                <p class="text-sm sub-text font-bold">Quizz prévus pour ce jour</p>
+            </div>
+            
+            <div id="quizz-details-content" class="overflow-y-auto pr-2 flex-1 space-y-3">
+                <!-- Rempli en JS -->
+            </div>
+            
+            <div class="mt-6 pt-4 border-t flex justify-between gap-3" style="border-color:var(--border)">
+                <button onclick="closeDetails()" class="flex-1 py-3 border font-bold rounded-xl sub-text hover:bg-gray-50 transition" style="border-color:var(--border)">Fermer</button>
+                <button id="btn-create-day" class="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Nouveau
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        if (!token) window.location.href = '/';
+        if (role === 'admin') {
+            document.getElementById('menu-admin-desktop').classList.remove('hidden');
+            document.getElementById('menu-admin-mobile').classList.remove('hidden');
+        }
+
+        // --- THÈME ---
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        applyTheme(savedTheme);
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            document.getElementById('theme-icon').className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            document.getElementById('theme-label').innerText = theme === 'dark' ? 'Clair' : 'Sombre';
+        }
+        function toggleTheme() {
+            applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        }
+
+        function toggleMobileMenu() {
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const menu = document.getElementById('mobile-menu');
+            if (overlay.classList.contains('hidden')) { overlay.classList.remove('hidden'); setTimeout(() => menu.classList.remove('-translate-x-full'), 10); }
+            else { menu.classList.add('-translate-x-full'); setTimeout(() => overlay.classList.add('hidden'), 300); }
+        }
+        function logout() { localStorage.clear(); window.location.href = '/'; }
+
+        // --- AGENDA ---
+        const monthNames = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let allQuizz = [];
+
+        async function fetchQuizz() {
+            try {
+                const res = await fetch('/api/quizz');
+                allQuizz = await res.json();
+                renderAgenda();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderAgenda() {
+            document.getElementById('month-display').innerText = `${monthNames[currentMonth]} ${currentYear}`;
+            const container = document.getElementById('calendar-grid');
+            container.innerHTML = '';
+            
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const offset = firstDay === 0 ? 6 : firstDay - 1;
+            
+            // Cases vides début
+            for (let i = 0; i < offset; i++) {
+                container.innerHTML += `<div class="calendar-cell opacity-30 bg-gray-50" style="background:var(--bg)"></div>`;
+            }
+            
+            const today = new Date();
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isToday = day === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
+                const currentDateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                // Trouver les quizz de ce jour
+                const dayQuizz = allQuizz.filter(q => q.date_planifiee.startsWith(currentDateStr));
+                
+                let hasQuizz = dayQuizz.length > 0;
+                let bgClass = hasQuizz ? 'bg-green-50 dark:bg-green-900/20' : '';
+                let greenCircle = hasQuizz ? '<div class="w-3 h-3 bg-green-500 rounded-full animate-pulse absolute top-2 left-2"></div>' : '';
+
+                let tagsHtml = dayQuizz.map(q => {
+                    const time = q.date_planifiee.substring(11, 16);
+                    const tagClass = q.statut === 'EN_ATTENTE' ? 'quizz-attente' : 'quizz-termine';
+                    return `<div class="quizz-tag ${tagClass}" title="${time} - ${q.titre}">
+                        <span>${time}</span> ${q.titre}
+                    </div>`;
+                }).join('');
+
+                const dayHeader = `<div class="text-right ${isToday ? 'text-red-500 font-black text-lg' : 'sub-text font-bold text-sm'}">${day}</div>`;
+                
+                // On passe les données du quizz (s'il y en a) pour afficher la modale
+                const quizzDataStr = hasQuizz ? encodeURIComponent(JSON.stringify(dayQuizz)) : '';
+
+                container.innerHTML += `<div class="calendar-cell cursor-pointer relative ${bgClass}" onclick="handleDayClick('${currentDateStr}', '${quizzDataStr}')">
+                    ${greenCircle}
+                    ${dayHeader}
+                    ${tagsHtml}
+                </div>`;
+            }
+            
+            // Cases vides fin
+            const totalCells = offset + daysInMonth;
+            const remaining = (7 - (totalCells % 7)) % 7;
+            for (let i = 0; i < remaining; i++) {
+                container.innerHTML += `<div class="calendar-cell opacity-30 bg-gray-50" style="background:var(--bg)"></div>`;
+            }
+        }
+
+        function changeMonth(s) {
+            currentMonth += s;
+            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            renderAgenda();
+        }
+
+        function handleDayClick(dateStr, quizzDataEncoded) {
+            if (quizzDataEncoded) {
+                const dayQuizz = JSON.parse(decodeURIComponent(quizzDataEncoded));
+                let html = dayQuizz.map(q => {
+                    const time = q.date_planifiee.substring(11, 16);
+                    return `
+                        <div class="card p-4 rounded-xl shadow-sm border mb-3 text-left">
+                            <h4 class="font-black text-lg text-red-500 mb-1">${q.titre}</h4>
+                            <p class="text-sm font-bold sub-text"><i class="fa-regular fa-clock"></i> ${time}</p>
+                            <p class="text-sm font-bold sub-text mt-2"><i class="fa-solid fa-user-pen"></i> Programmé par : <span class="text-gray-800 dark:text-gray-200">${q.createur || 'Inconnu'}</span></p>
+                        </div>
+                    `;
+                }).join('');
+                
+                document.getElementById('quizz-details-content').innerHTML = html;
+                document.getElementById('quizz-details-date').innerText = new Date(dateStr).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year:'numeric' });
+                document.getElementById('details-modal').classList.remove('hidden');
+                
+                // Ajouter l'action au bouton de création
+                document.getElementById('btn-create-day').onclick = () => window.location.href = `/nouveau-quizz.html?date=${dateStr}`;
+            } else {
+                window.location.href = `/nouveau-quizz.html?date=${dateStr}`;
+            }
+        }
+
+        function closeDetails() {
+            document.getElementById('details-modal').classList.add('hidden');
+        }
+
+        fetchQuizz();
+    </script>
+</body>
+</html>

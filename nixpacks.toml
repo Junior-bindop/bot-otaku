@@ -1,0 +1,13 @@
+# nixpacks.toml — Configuration Railway pour installer Google Chrome sur Linux
+
+[phases.setup]
+nixPkgs = [
+    "nodejs_20",
+    "google-chrome"
+]
+
+[phases.install]
+cmds = ["npm install"]
+
+[start]
+cmd = "node src/api/server.js"

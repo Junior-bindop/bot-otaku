@@ -1,0 +1,19 @@
+# Dépendances Node
+node_modules/
+
+# Données locales et session WhatsApp (gérées par Railway Volume)
+data/
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Variables d'environnement secrètes
+.env
+
+# Fichiers temporaires et scripts de dev
+fix_links.js
+update_sidebar.js
+reset.js
+stickers/
+
+# Logs
+*.log
