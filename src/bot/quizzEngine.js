@@ -8,10 +8,10 @@ let currentQuestion = null;
 let answeredUsers = new Map();
 let correctAnswerCount = 0;
 let messageListener = null;
-let firstCorrectDone = false; // Déjà eu un premier correct cette question ?
-let firstWrongDone = false;   // Déjà eu un premier faux cette question ?
-let graceQuestion = null;     // Données de la question dans la fenêtre de grâce (3s après fin)
-let participantsQuizz = new Set(); // Membres ayant participé au quiz actuel
+let firstCorrectDone = false;
+let firstWrongDone = false;
+let graceQuestion = null;
+let participantsQuizz = new Set();
 
 // Points selon l'ordre de réponse
 const POINTS_MAP = [5, 4, 3, 2, 1];
@@ -53,7 +53,6 @@ async function runQuestion(question, questionIdx, totalQuestions, client, groupI
     firstWrongDone = false;
     graceQuestion = null;
 
-    // Récupérer les réponses valables
     const reponses = await new Promise((resolve, reject) => {
         db.all('SELECT texte_reponse FROM ReponseValable WHERE question_id = ?', [question.id], (err, rows) => {
             if (err) return reject(err);
@@ -63,7 +62,6 @@ async function runQuestion(question, questionIdx, totalQuestions, client, groupI
 
     currentQuestion.reponsesValables = reponses;
 
-    // Construire le message de question
     let msgQuestion = `❓ *Question ${questionIdx}/${totalQuestions}*\n\n${question.texte}\n\n`;
     if (question.type === 'QCM' && question.choix) {
         const choix = JSON.parse(question.choix || '[]');
@@ -76,19 +74,15 @@ async function runQuestion(question, questionIdx, totalQuestions, client, groupI
 
     await client.sendMessage(groupId, msgQuestion);
 
-    // Attendre le temps imparti
     await sleep(question.temps_imparti * 1000);
 
-    // Arrêter la question — fenêtre de grâce de 3s pour "trop tard"
     graceQuestion = { reponsesValables: reponses, type: question.type, choix: question.choix };
     currentQuestion = null;
-    await sleep(3000); // Fenêtre de grâce
+    await sleep(3000);
     graceQuestion = null;
 
-    // Envoyer "Terminé !"
     await client.sendMessage(groupId, `⛔ *Terminé !*\n\n✅ La bonne réponse était : *${reponses[0]}*`);
 
-    // Construire et envoyer le classement de la question
     const results = [...answeredUsers.values()].sort((a, b) => a.order - b.order);
     const correctResults = results.filter(r => r.correct && r.points > 0);
 
@@ -115,7 +109,6 @@ function handleMessage(client, groupId, quizzId) {
         const texteReponse = msg.body.trim().toLowerCase();
         if (!texteReponse) return;
 
-        // ── Fenêtre de grâce : bonne réponse APRÈS la fin du temps ──
         if (!currentQuestion && graceQuestion && !answeredUsers.has(senderId)) {
             const repG = graceQuestion.reponsesValables || [];
             const lettres = ['a', 'b', 'c', 'd'];
@@ -136,7 +129,6 @@ function handleMessage(client, groupId, quizzId) {
 
         if (!currentQuestion) return;
 
-        // Un membre ne peut répondre qu'une seule fois par question
         if (answeredUsers.has(senderId)) return;
 
         let nom = senderId.split('@')[0];
@@ -149,13 +141,11 @@ function handleMessage(client, groupId, quizzId) {
 
         db.run(`INSERT INTO Membre (numero, pseudo) VALUES (?, ?) ON CONFLICT(numero) DO UPDATE SET pseudo=excluded.pseudo`, [senderId, nom]);
 
-        // Incrémenter les batailles si c'est sa première participation à ce quiz
         if (!participantsQuizz.has(senderId)) {
             participantsQuizz.add(senderId);
             db.run(`UPDATE Membre SET batailles = batailles + 1 WHERE numero = ?`, [senderId]);
         }
 
-        // Vérifier si la réponse est correcte
         const reponsesValables = currentQuestion.reponsesValables || [];
         const lettres = ['a', 'b', 'c', 'd'];
 
@@ -177,14 +167,12 @@ function handleMessage(client, groupId, quizzId) {
             points = POINTS_MAP[correctAnswerCount] || 0;
             correctAnswerCount++;
 
-            // Message spécial si PREMIER correct (en REPLY au message du joueur)
             if (!firstCorrectDone) {
                 firstCorrectDone = true;
                 await client.sendMessage(msg.from, R.QUIZ_FIRST_CORRECT(nom, points), { quotedMessageId: msg.id._serialized });
                 await sendSticker(client, msg, R.QUIZ_FIRST_CORRECT_STICKER);
             }
 
-            // Score en BDD
             db.get(`SELECT id FROM Score WHERE quizz_id = ? AND numero_joueur = ?`, [quizzId, senderId], (err, row) => {
                 if (row) {
                     db.run(`UPDATE Score SET points = points + ? WHERE id = ?`, [points, row.id]);
@@ -193,7 +181,6 @@ function handleMessage(client, groupId, quizzId) {
                 }
             });
         } else {
-            // Message spécial si PREMIER à répondre FAUX (en REPLY)
             if (!firstWrongDone && !firstCorrectDone) {
                 firstWrongDone = true;
                 await client.sendMessage(msg.from, R.QUIZ_FIRST_WRONG(nom), { quotedMessageId: msg.id._serialized });
@@ -212,16 +199,13 @@ async function runQuizz(quizz, client, groupId) {
     activeQuizz = quizz;
     participantsQuizz.clear();
 
-    // Marquer comme EN_COURS
     db.run(`UPDATE Quizz SET statut = 'EN_COURS' WHERE id = ?`, [quizz.id]);
 
-    // Message de début
     await client.sendMessage(groupId,
         `🔥 *LE QUIZZ COMMENCE !*\n\n🏆 *${quizz.titre}*\n\nPréparez-vous à répondre ! Le premier à donner la bonne réponse gagne 5 points ! ⚔️`
     );
     await sleep(3000);
 
-    // Récupérer les questions
     const questions = await new Promise((resolve, reject) => {
         db.all('SELECT * FROM Question WHERE quizz_id = ? ORDER BY id ASC', [quizz.id], (err, rows) => {
             if (err) return reject(err);
@@ -229,10 +213,8 @@ async function runQuizz(quizz, client, groupId) {
         });
     });
 
-    // Activer le listener de messages
     handleMessage(client, groupId, quizz.id);
 
-    // Lancer chaque question
     for (let i = 0; i < questions.length; i++) {
         await client.sendMessage(groupId, `⏳ *Tenez-vous prêts, je balance dans 10 secondes !*`);
         await sleep(10000);
@@ -240,18 +222,15 @@ async function runQuizz(quizz, client, groupId) {
         await runQuestion(questions[i], i + 1, questions.length, client, groupId);
 
         if (i < questions.length - 1) {
-            // Attendre 30 secondes avant de balancer l'avertissement de la prochaine question
             await sleep(30000);
         }
     }
 
-    // Désactiver le listener
     if (messageListener) {
         client.removeListener('message', messageListener);
         messageListener = null;
     }
 
-    // Classement final attend 1 minute (60s)
     await sleep(60000);
     
     const scores = await new Promise((resolve, reject) => {
@@ -273,11 +252,9 @@ async function runQuizz(quizz, client, groupId) {
         await client.sendMessage(groupId, `🤡 *Fin du quizz !*\n\nIncroyable... absolument personne n'a marqué de points ce soir !`);
     }
 
-    // Message d'encouragement juste après
     await sleep(2000);
     await client.sendMessage(groupId, `🎉 *Fin des hostilités !*\n\nMerci à tous pour votre participation ! Ne vous découragez pas si vous n'avez pas gagné cette fois-ci, continuez d'apprendre et le prochain quizz sera le vôtre ! 💪🔥\nOn se capte pour la prochaine bataille !`);
 
-    // Marquer comme TERMINE
     db.run(`UPDATE Quizz SET statut = 'TERMINE' WHERE id = ?`, [quizz.id]);
     activeQuizz = null;
 }
@@ -287,19 +264,31 @@ function startEngine(client, groupId) {
     console.log('🎮 Moteur de Quizz démarré - Vérification toutes les 60 secondes');
 
     setInterval(async () => {
-        if (activeQuizz) return; // Un quizz est déjà en cours
+        if (activeQuizz) return;
 
-        // Création de l'heure actuelle au format local 'YYYY-MM-DDTHH:mm'
         const d = new Date();
         const pad = (n) => String(n).padStart(2, '0');
         const localNow = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
-        db.get(
-            `SELECT * FROM Quizz WHERE statut = 'EN_ATTENTE' AND date_planifiee <= ? ORDER BY date_planifiee ASC LIMIT 1`,
-            [localNow],
-            async (err, quizz) => {
-                if (err || !quizz) return;
-                console.log(`🚀 Démarrage du quizz : ${quizz.titre}`);
+        db.all(
+            `SELECT * FROM Quizz WHERE statut = 'EN_ATTENTE' ORDER BY date_planifiee ASC`,
+            [],
+            async (err, quizzs) => {
+                if (err) {
+                    console.error('Erreur requête quizz:', err.message);
+                    return;
+                }
+                if (!quizzs || quizzs.length === 0) return;
+
+                const quizz = quizzs.find(q => {
+                    if (!q.date_planifiee) return false;
+                    const dateQuizz = q.date_planifiee.substring(0, 16);
+                    return dateQuizz <= localNow;
+                });
+
+                if (!quizz) return;
+
+                console.log(`🚀 Démarrage du quizz : ${quizz.titre} (prévu le ${quizz.date_planifiee})`);
                 try {
                     await runQuizz(quizz, client, groupId);
                 } catch (e) {
