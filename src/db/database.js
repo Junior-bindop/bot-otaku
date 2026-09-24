@@ -3,7 +3,6 @@ const path = require('path');
 const fs = require('fs');
 
 // Sur Railway, les données doivent être dans le Volume persistant
-// La variable RAILWAY_VOLUME_MOUNT_PATH est automatiquement définie par Railway
 const dataDir = process.env.RAILWAY_VOLUME_MOUNT_PATH
     ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'data')
     : path.resolve(__dirname, '../../data');
@@ -18,6 +17,16 @@ const db = new sqlite3.Database(dbPath);
 db.run('PRAGMA foreign_keys = ON;');
 db.run('PRAGMA journal_mode = WAL;');
 
+// Fonction utilitaire pour ajouter une colonne si elle n'existe pas
+const addColumnIfMissing = (tableName, colName, colType) => {
+    db.all(`PRAGMA table_info(${tableName})`, (err, rows) => {
+        if (rows && !rows.find(c => c.name === colName)) {
+            console.log(`➕ Ajout de la colonne ${colName} à ${tableName}`);
+            db.run(`ALTER TABLE ${tableName} ADD COLUMN ${colName} ${colType}`);
+        }
+    });
+};
+
 // Initialisation des tables
 db.serialize(() => {
     // 1. Table des Quizz
@@ -25,8 +34,12 @@ db.serialize(() => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         titre TEXT NOT NULL,
         date_planifiee DATETIME,
-        statut TEXT DEFAULT 'EN_ATTENTE' 
+        statut TEXT DEFAULT 'EN_ATTENTE',
+        createur TEXT DEFAULT 'Inconnu'
     )`);
+
+    // Ajout de la colonne createur si elle manque (base existante)
+    addColumnIfMissing('Quizz', 'createur', "TEXT DEFAULT 'Inconnu'");
 
     // 2. Table des Questions
     db.run(`CREATE TABLE IF NOT EXISTS Question (
@@ -67,17 +80,9 @@ db.serialize(() => {
         batailles INTEGER DEFAULT 0
     )`);
 
-    // Ajout des colonnes à la table Membre si elles n'existent pas
-    const addColumn = (colName, colType) => {
-        db.all(`PRAGMA table_info(Membre)`, (err, rows) => {
-            if (rows && !rows.find(c => c.name === colName)) {
-                db.run(`ALTER TABLE Membre ADD COLUMN ${colName} ${colType}`);
-            }
-        });
-    };
-    addColumn('role', "TEXT DEFAULT 'Membre'");
-    addColumn('message_count', "INTEGER DEFAULT 0");
-    addColumn('batailles', "INTEGER DEFAULT 0");
+    addColumnIfMissing('Membre', 'role', "TEXT DEFAULT 'Membre'");
+    addColumnIfMissing('Membre', 'message_count', "INTEGER DEFAULT 0");
+    addColumnIfMissing('Membre', 'batailles', "INTEGER DEFAULT 0");
 
     // 6. Table Configuration / Logs
     db.run(`CREATE TABLE IF NOT EXISTS Config (
@@ -114,13 +119,16 @@ db.serialize(() => {
         compte INTEGER DEFAULT 1
     )`);
 
-    // 10. Table Settings (Mot de passe Superadmin)
+    // 10. Table Settings (Mots de passe)
     db.run(`CREATE TABLE IF NOT EXISTS Settings (
         cle TEXT PRIMARY KEY,
         valeur TEXT NOT NULL
     )`, () => {
-        // Initialiser le mot de passe superadmin par défaut si inexistant
+        // Initialiser les mots de passe par défaut si inexistants
         db.run(`INSERT OR IGNORE INTO Settings (cle, valeur) VALUES ('superadmin_password', 'superadmin')`);
+        db.run(`INSERT OR IGNORE INTO Settings (cle, valeur) VALUES ('public_password', 'otaku123')`);
+        db.run(`INSERT OR IGNORE INTO Settings (cle, valeur) VALUES ('quizz_password', '_mikasa_')`);
+        console.log('✅ Table Settings initialisée avec les mots de passe par défaut');
     });
 });
 
