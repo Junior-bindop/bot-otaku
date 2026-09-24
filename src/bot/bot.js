@@ -20,10 +20,8 @@ const puppeteerConfig = {
         '--disable-dev-shm-usage',
         '--disable-accelerated-2d-canvas',
         '--no-first-run',
-        '--no-zygote',
         '--disable-gpu',
-        '--disable-extensions',
-        '--single-process'
+        '--disable-extensions'
     ]
 };
 
@@ -42,7 +40,7 @@ if (isLinux) {
         '/usr/bin/google-chrome-stable',
         '/usr/bin/google-chrome',
         '/opt/google/chrome/chrome'
-    ].filter(Boolean); // Enlève les valeurs vides
+    ].filter(Boolean);
 
     let chromeTrouve = null;
     for (const chemin of cheminsPossibles) {
@@ -119,15 +117,12 @@ client.on('message', async msg => {
             nom = (msg._data && msg._data.notifyName) ? msg._data.notifyName : nom;
         }
         
-        // Vérification du rôle par défaut (Membre, ou Admin si c'est le numéro spécifié)
         const rolePredefini = msg.author.includes('237620793844') ? 'Admin' : 'Membre';
         
-        // 1. Enregistrement / MAJ du membre + Incrémentation de l'importance
         db.run(`INSERT INTO Membre (numero, pseudo, message_count, role) VALUES (?, ?, 1, ?) 
                 ON CONFLICT(numero) DO UPDATE SET pseudo=excluded.pseudo, message_count=message_count + 1`, 
                 [msg.author, nom, rolePredefini]);
 
-        // 2. Traitement des mots pour les statistiques (ignorer les mots courants)
         if (msg.body) {
             const stopWords = new Set([
                 'le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'et', 'en', 'a', 'à', 'pour', 'qui', 'que', 
@@ -138,7 +133,6 @@ client.on('message', async msg => {
                 'sommes', 'êtes', 'sont', 'ai', 'as', 'a', 'avons', 'avez', 'ont', 'qu', 'n', 's', 'm', 't', 'l', 'd', 'j', 'y'
             ]);
             
-            // Extraction des mots de 3 lettres ou plus
             const mots = msg.body.toLowerCase().replace(/[^\w\sàâäéèêëîïôöùûüç]/g, ' ').split(/\s+/);
             const motsFiltres = mots.filter(w => w.length > 2 && !stopWords.has(w));
             
@@ -153,12 +147,10 @@ client.on('message', async msg => {
         try { await handleSocialMessage(msg, client, groupId); } catch (e) { console.error('[SOCIAL] Erreur:', e.message); }
     }
 
-    // Commande de test
     if (msg.body === '!ping') {
         msg.reply('pong 🏓');
     }
 
-    // ── Commande !sticker : Sauvegarder un sticker depuis WhatsApp ──
     if (msg.body && msg.body.startsWith('!sticker ') && msg.hasQuotedMsg) {
         const stickerName = msg.body.replace('!sticker ', '').trim().replace(/[^a-zA-Z0-9_\-]/g, '_');
         if (!stickerName) { msg.reply('❌ Précise un nom. Ex: `!sticker welcome`'); return; }
@@ -184,21 +176,18 @@ client.on('message', async msg => {
     }
 });
 
-// ── Nouveau membre dans le groupe ────────────────────────────
 client.on('group_join', async (notification) => {
     const groupId = process.env.GROUP_ID;
     if (!groupId) return;
     try { await handleGroupJoin(notification, client, groupId); } catch (e) { console.error('[JOIN] Erreur:', e.message); }
 });
 
-// ── Membre qui quitte le groupe ──────────────────────────────
 client.on('group_leave', async (notification) => {
     const groupId = process.env.GROUP_ID;
     if (!groupId) return;
     try { await handleGroupLeave(notification, client, groupId); } catch (e) { console.error('[LEAVE] Erreur:', e.message); }
 });
 
-// ── Changement de rôle (Admin/Katika) ────────────────────────
 client.on('group_admin_changed', async (notification) => {
     try {
         const type = notification.type;
@@ -219,12 +208,10 @@ client.on('group_admin_changed', async (notification) => {
     }
 });
 
-// Initialisation du client
 const startBot = () => {
     console.log('Démarrage du bot WhatsApp...');
     client.initialize();
     
-    // Tâche cron pour l'employé de la semaine (chaque dimanche à 20h00)
     try {
         const cron = require('node-cron');
         cron.schedule('0 20 * * 0', async () => {
@@ -237,8 +224,6 @@ const startBot = () => {
                 const msg = `🏆 *MEMBRE DE LA SEMAINE* 🏆\n\nFélicitations à *${row.pseudo}* qui a été le membre le plus actif cette semaine avec *${row.message_count}* messages envoyés ! 🎉🔥\n\n_Les compteurs d'importance ont été remis à zéro._`;
                 
                 client.sendMessage(groupId, msg).catch(console.error);
-
-                // Remise à zéro
                 db.run(`UPDATE Membre SET message_count = 0`);
             });
         }, {
@@ -250,15 +235,10 @@ const startBot = () => {
     }
 };
 
-// Fonction pour synchroniser les membres du groupe
 async function syncGroupMembers(client, groupId) {
     try {
         console.log("🔄 Récupération des membres du groupe WhatsApp...");
-        
-        console.log("-> Étape 1 : Demande de tous les chats...");
         const chats = await client.getChats();
-        
-        console.log("-> Étape 2 : Recherche du groupe par ID...");
         const chat = chats.find(c => c.id._serialized === groupId);
         
         if (!chat || !chat.isGroup) {
@@ -266,7 +246,7 @@ async function syncGroupMembers(client, groupId) {
             return;
         }
 
-        console.log(`-> Étape 3 : Groupe trouvé (${chat.name || 'Sans Nom'}). Nb participants : ${chat.participants.length}`);
+        console.log(`-> Groupe trouvé (${chat.name || 'Sans Nom'}). Nb participants : ${chat.participants.length}`);
 
         const db = require('../db/database');
         let count = 0;
@@ -278,9 +258,7 @@ async function syncGroupMembers(client, groupId) {
             try {
                 const contact = await client.getContactById(participant.id._serialized);
                 pseudo = contact.pushname || contact.name || numero;
-            } catch (err) {
-                // Si getContactById plante
-            }
+            } catch (err) {}
 
             db.run(`INSERT INTO Membre (numero, pseudo) VALUES (?, ?)
                     ON CONFLICT(numero) DO UPDATE SET pseudo=excluded.pseudo`, 
