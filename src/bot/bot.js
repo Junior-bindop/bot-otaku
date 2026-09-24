@@ -34,10 +34,30 @@ if (!isLinux) {
     if (fs.existsSync(chromePath)) puppeteerConfig.executablePath = chromePath;
     else if (fs.existsSync(edgePath)) puppeteerConfig.executablePath = edgePath;
 }
-// Sur Linux (Railway) : utiliser Google Chrome installé via nixpacks.toml
+
+// Sur Linux (Railway) : utiliser Google Chrome installé via le Dockerfile
 if (isLinux) {
-    const linuxChrome = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable';
-    if (fs.existsSync(linuxChrome)) puppeteerConfig.executablePath = linuxChrome;
+    const cheminsPossibles = [
+        process.env.PUPPETEER_EXECUTABLE_PATH,
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/google-chrome',
+        '/opt/google/chrome/chrome'
+    ].filter(Boolean); // Enlève les valeurs vides
+
+    let chromeTrouve = null;
+    for (const chemin of cheminsPossibles) {
+        if (fs.existsSync(chemin)) {
+            chromeTrouve = chemin;
+            break;
+        }
+    }
+
+    if (chromeTrouve) {
+        puppeteerConfig.executablePath = chromeTrouve;
+        console.log(`✅ Chrome trouvé : ${chromeTrouve}`);
+    } else {
+        console.error('❌ Aucun Chrome trouvé ! Chemins testés :', cheminsPossibles);
+    }
 }
 
 // ── Chemin de session WhatsApp (persistant sur Railway via Volume) ──
@@ -102,7 +122,7 @@ client.on('message', async msg => {
         // Vérification du rôle par défaut (Membre, ou Admin si c'est le numéro spécifié)
         const rolePredefini = msg.author.includes('237620793844') ? 'Admin' : 'Membre';
         
-        // 1. Enregistrement / MAJ du membre + Incrémentation de l'importance (ne pas écraser le rôle existant s'il a déjà été défini manuellement, sauf si c'est pour l'initialiser)
+        // 1. Enregistrement / MAJ du membre + Incrémentation de l'importance
         db.run(`INSERT INTO Membre (numero, pseudo, message_count, role) VALUES (?, ?, 1, ?) 
                 ON CONFLICT(numero) DO UPDATE SET pseudo=excluded.pseudo, message_count=message_count + 1`, 
                 [msg.author, nom, rolePredefini]);
@@ -139,7 +159,6 @@ client.on('message', async msg => {
     }
 
     // ── Commande !sticker : Sauvegarder un sticker depuis WhatsApp ──
-    // Usage : reply sur un sticker avec "!sticker nom_du_fichier"
     if (msg.body && msg.body.startsWith('!sticker ') && msg.hasQuotedMsg) {
         const stickerName = msg.body.replace('!sticker ', '').trim().replace(/[^a-zA-Z0-9_\-]/g, '_');
         if (!stickerName) { msg.reply('❌ Précise un nom. Ex: `!sticker welcome`'); return; }
@@ -182,12 +201,11 @@ client.on('group_leave', async (notification) => {
 // ── Changement de rôle (Admin/Katika) ────────────────────────
 client.on('group_admin_changed', async (notification) => {
     try {
-        const type = notification.type; // 'promote' ou 'demote'
+        const type = notification.type;
         const affectedIds = notification.recipientIds;
         const specialNumber = process.env.SPECIAL_MEMBER_NUMBER;
 
         for (const id of affectedIds) {
-            // Le membre spécial reste TOUJOURS Katika
             if (id === specialNumber) {
                 db.run(`UPDATE Membre SET role = 'Katika' WHERE numero = ?`, [id]);
                 continue;
@@ -255,7 +273,7 @@ async function syncGroupMembers(client, groupId) {
         
         for (let participant of chat.participants) {
             const numero = participant.id.user;
-            let pseudo = numero; // Fallback par défaut
+            let pseudo = numero;
 
             try {
                 const contact = await client.getContactById(participant.id._serialized);
