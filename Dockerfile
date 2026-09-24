@@ -26,4 +26,6 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 EXPOSE 8080
 
-CMD ["xvfb-run", "--auto-servernum", "--server-args=-screen 0 1280x1024x24", "node", "src/api/server.js"]
+RUN chmod +x /app/start.sh
+
+CMD ["xvfb-run", "--auto-servernum", "--server-args=-screen 0 1280x1024x24", "/app/start.sh"]
