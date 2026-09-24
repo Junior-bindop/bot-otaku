@@ -1,9 +1,30 @@
-# nixpacks.toml — Configuration Railway pour installer Google Chrome sur Linux
+# nixpacks.toml — Configuration Railway pour Google Chrome + Puppeteer
 
 [phases.setup]
 nixPkgs = [
     "nodejs_20",
-    "google-chrome"
+    "google-chrome",
+    "glib",
+    "nss",
+    "nspr",
+    "atk",
+    "at-spi2-atk",
+    "cups",
+    "dbus",
+    "libdrm",
+    "libxkbcommon",
+    "xorg.libX11",
+    "xorg.libXcomposite",
+    "xorg.libXdamage",
+    "xorg.libXext",
+    "xorg.libXfixes",
+    "xorg.libXrandr",
+    "mesa",
+    "pango",
+    "cairo",
+    "alsa-lib",
+    "at-spi2-core",
+    "libgbm"
 ]
 
 [phases.install]
@@ -11,3 +32,7 @@ cmds = ["npm install"]
 
 [start]
 cmd = "node src/api/server.js"
+
+[variables]
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
+PUPPETEER_EXECUTABLE_PATH = "/usr/bin/google-chrome"
