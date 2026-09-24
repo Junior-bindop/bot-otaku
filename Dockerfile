@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+# Force cache invalidation - v2
 COPY package*.json ./
 RUN npm install
 
