@@ -1,11 +1,16 @@
-FROM node:20-slim
+FROM node:20-bullseye-slim
 
-# Installer les dépendances système nécessaires pour Chrome/Puppeteer
+# Installer TOUTES les dépendances système nécessaires pour Chrome/Puppeteer
+# (y compris libglib2.0-0, libnss3, et toutes les autres bibliothèques partagées)
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
     ca-certificates \
-    fonts-liberation \
+    procps \
+    libxss1 \
+    xvfb \
+    dbus \
+    dbus-x11 \
     libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
@@ -23,11 +28,10 @@ RUN apt-get update && apt-get install -y \
     libxfixes3 \
     libxkbcommon0 \
     libxrandr2 \
+    libxshmfence1 \
+    fonts-liberation \
     xdg-utils \
-    && rm -rf /var/lib/apt/lists/*
-
-# Installer Google Chrome
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list' \
     && apt-get update \
     && apt-get install -y google-chrome-stable \
@@ -42,8 +46,12 @@ RUN npm install
 # Copier le reste du code
 COPY . .
 
-# Exposer le port (adaptez si nécessaire)
+# Variables d'environnement pour Puppeteer
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+
+# Exposer le port
 EXPOSE 8080
 
-# Commande de démarrage
-CMD ["node", "src/api/server.js"]
+# Commande de démarrage avec Xvfb (nécessaire pour Chrome sur VPS sans écran)
+CMD ["xvfb-run", "--auto-servernum", "--server-args=-screen 0 1280x1024x24", "node", "src/api/server.js"]
