@@ -1,20 +1,20 @@
 {
   "name": "bot-whatsapp-otaku",
   "version": "1.0.0",
-  "description": "Bot WhatsApp pour quizz Otaku",
+  "description": "Bot WhatsApp OtakuQuizz",
   "main": "src/api/server.js",
   "scripts": {
-    "start": "node src/api/server.js",
-    "bot": "node src/bot/bot.js"
+    "start": "node src/api/server.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.6.1",
-    "express": "^4.19.2",
-    "node-cron": "^4.6.0",
-    "qrcode": "^1.5.4",
+    "whatsapp-web.js": "^1.26.1-alpha.3",
+    "puppeteer": "^23.0.0",
+    "qrcode": "^1.5.3",
     "qrcode-terminal": "^0.12.0",
-    "sqlite3": "^5.1.7",
-    "whatsapp-web.js": "^1.23.1"
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3",
+    "sqlite3": "^5.1.7"
   }
 }
