@@ -24,4 +24,4 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 
 EXPOSE 8080
 
-CMD ["xvfb-run", "--auto-servernum", "--server-args=-screen 0 1280x1024x24", "node", "src/api/server.js"]
+CMD ["sh", "-c", "echo '=== DEBUT DEMARRAGE ===' && ls -la /app && echo '=== LANCEMENT NODE ===' && node src/api/server.js 2>&1"]
